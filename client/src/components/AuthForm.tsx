@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AuthFormData } from "../types/auth";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface AuthFormProps {
   title: string;
@@ -82,12 +83,12 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, isLogin, onSubmit }) => {
       </form>
       <p className="mt-4 text-center">
         {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-        <a
-          href={isLogin ? "/register" : "/login"}
+        <Link
+          to={isLogin ? "/register" : "/login"}
           className="text-blue-500 hover:underline"
         >
           {isLogin ? "Register" : "Login"}
-        </a>
+        </Link>
       </p>
     </div>
   );

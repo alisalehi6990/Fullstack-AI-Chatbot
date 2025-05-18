@@ -1,6 +1,8 @@
+import { useMutation } from "@apollo/client";
 import axios from "axios";
 import React, { useState } from "react";
 import { useFormStatus } from "react-dom";
+import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
 
 type Message = {
   isUser: boolean;
@@ -22,20 +24,28 @@ const SubmitButton = ({ input }: { input: string }) => {
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [chat] = useMutation(CHAT_MUTATION);
 
   const handleSend = async () => {
     if (!input.trim()) return;
     const userMessage: Message = { isUser: true, content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+
     try {
-      const res = await axios.post("http://localhost:4000/chat", {
-        message: input,
-      });
+      const res = await chat({ variables: { message: input } });
+
       const botMessage: Message = {
+        content: res.data.chat.aiResponse,
         isUser: false,
-        content: res.data.message,
       };
+      // const res = await axios.post("http://localhost:4000/chat", {
+      //   message: input,
+      // });
+      // const botMessage: Message = {
+      //   isUser: false,
+      //   content: res.data.message,
+      // };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error("Error sending message:", error);

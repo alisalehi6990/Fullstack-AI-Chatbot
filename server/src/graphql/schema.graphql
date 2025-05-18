@@ -1,0 +1,12 @@
+type Message {
+  userMessage: String!
+  aiResponse: String!
+}
+
+type Query {
+  dummy: String
+}
+
+type Mutation {
+  chat(message: String!): Message!
+}
