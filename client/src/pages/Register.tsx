@@ -5,12 +5,12 @@ import { AuthFormData } from "../types/auth";
 
 const Register: React.FC = () => {
   const handleRegister = async (data: AuthFormData) => {
-    const response = await registerUser(data);
-    localStorage.setItem("token", response.token);
-    console.log("Logging in with", data);
+    await registerUser(data);
   };
 
-  return <AuthForm title="Login" onSubmit={handleRegister} />;
+  return (
+    <AuthForm title="Register" isLogin={false} onSubmit={handleRegister} />
+  );
 };
 
 export default Register;

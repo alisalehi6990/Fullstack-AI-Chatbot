@@ -27,7 +27,7 @@ export const registerUser = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).json(newUser);
+    res.status(201).json({ message: "User created. Awaiting admin approval." });
   } catch (error) {
     console.error("Error registering user:", error);
     res.status(500).json({ message: "Internal server error" });
