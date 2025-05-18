@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 interface AuthFormProps {
   title: string;
-  isLogin: boolean;
+  isLogin?: boolean;
   onSubmit: (data: AuthFormData) => Promise<void>;
 }
 

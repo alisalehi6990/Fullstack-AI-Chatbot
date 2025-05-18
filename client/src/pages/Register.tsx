@@ -1,11 +1,16 @@
-import React from 'react'
+import React from "react";
+import AuthForm from "../components/AuthForm";
+import { registerUser } from "../services/api";
+import { AuthFormData } from "../types/auth";
 
-function Register() {
-  return (
-    <div>
-      df
-    </div>
-  )
-}
+const Register: React.FC = () => {
+  const handleRegister = async (data: AuthFormData) => {
+    const response = await registerUser(data);
+    localStorage.setItem("token", response.token);
+    console.log("Logging in with", data);
+  };
 
-export default Register
+  return <AuthForm title="Login" onSubmit={handleRegister} />;
+};
+
+export default Register;
