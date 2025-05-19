@@ -7,6 +7,7 @@ import client from "./services/apolloClient";
 import AdminPanel from "./pages/AdminPanel";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthRedirect from "./components/AuthRedirect";
+import Layout from "./components/Layout";
 
 function App() {
   return (
@@ -33,7 +34,9 @@ function App() {
             path="/chat"
             element={
               <ProtectedRoute>
-                <Chat />
+                <Layout>
+                  <Chat />
+                </Layout>
               </ProtectedRoute>
             }
           />
@@ -41,7 +44,9 @@ function App() {
             path="/admin"
             element={
               <ProtectedRoute requiredRole="ADMIN">
-                <AdminPanel />
+                <Layout>
+                  <AdminPanel />
+                </Layout>
               </ProtectedRoute>
             }
           />
