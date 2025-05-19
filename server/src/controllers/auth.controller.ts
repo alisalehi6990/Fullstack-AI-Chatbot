@@ -108,3 +108,41 @@ export const verifyToken = async (req: Request, res: Response) => {
     res.status(401).json({ message: "Invalid token" });
   }
 };
+
+export const clerkSignIn = async (req: Request, res: Response) => {
+  const { clerkId, email, displayName } = req.body;
+
+  try {
+    let user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          clerkId,
+          email,
+          displayName,
+          role: Role.USER,
+          isActive: true,
+        },
+      });
+    } else if (!user.clerkId) {
+      await prisma.user.update({
+        where: { email },
+        data: { clerkId },
+      });
+    }
+    if (!user.isActive) {
+      res.status(403).json({ error: "Account not activated" });
+    }
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    res.status(200).json({ token, message: "Login successful" });
+  } catch (error) {
+    console.error("Error signing in with Clerk:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

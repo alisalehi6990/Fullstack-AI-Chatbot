@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUserStore } from "../store/userStore";
+import { SignOutButton } from "@clerk/clerk-react";
 
 const Sidebar: React.FC = () => {
   const { user, clearUser } = useUserStore();
@@ -87,13 +88,13 @@ const Sidebar: React.FC = () => {
               >
                 <path
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
                   d="M4 8h11m0 0-4-4m4 4-4 4m-5 3H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h3"
                 ></path>
               </svg>
-              Logout
+              <SignOutButton />
             </Link>
           </li>
         </ul>

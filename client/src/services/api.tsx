@@ -56,3 +56,16 @@ export async function verifyToken(): Promise<VerifyResponse> {
     throw new Error("Token verification failed");
   }
 }
+
+export async function clerkSignIn(userData: {
+  clerkId: string;
+  email: string;
+  displayName: string | null;
+}): Promise<AuthResponse> {
+  try {
+    const response: AxiosResponse<AuthResponse> = await api.post("/auth/clerk", userData);
+    return response.data;
+  } catch (error) {
+    throw new Error("Login failed");
+  }
+}

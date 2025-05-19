@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AuthFormData } from "../types/auth";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import ClerkSignInButton from "./ClerkSignInButton";
 
 interface AuthFormProps {
   title: string;
@@ -87,7 +88,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
           {title}
         </button>
       </form>
-      <p className="mt-4 text-center">
+      <p className="my-4 text-center">
         {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
         <Link
           to={"#"}
@@ -97,6 +98,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
           {isLogin ? "Register" : "Login"}
         </Link>
       </p>
+
+      <ClerkSignInButton />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AuthRedirect from "./components/AuthRedirect";
 import Layout from "./components/Layout";
 import SigninPage from "./pages/Signin";
+import ClerkCallbackPage from "./pages/ClerkCallbackPage";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
             }
           />
           <Route path="/" element={<SigninPage />} />
+          <Route path="/clerk-callback" element={<ClerkCallbackPage />} />
         </Routes>
       </BrowserRouter>
     </ApolloProvider>
