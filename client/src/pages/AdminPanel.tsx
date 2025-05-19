@@ -1,4 +1,3 @@
-// src/pages/AdminPanel.tsx
 import React from "react";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { useUserStore } from "../store/userStore";

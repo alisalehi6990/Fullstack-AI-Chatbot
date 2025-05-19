@@ -46,13 +46,7 @@ const Chat: React.FC = () => {
         content: res.data.chat.aiResponse,
         isUser: false,
       };
-      // const res = await axios.post("http://localhost:4000/chat", {
-      //   message: input,
-      // });
-      // const botMessage: Message = {
-      //   isUser: false,
-      //   content: res.data.message,
-      // };
+
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error("Error sending message:", error);

@@ -1,4 +1,3 @@
-// src/graphql/context.ts
 import { ExpressContext } from "apollo-server-express";
 
 export const context = async ({ req }: ExpressContext) => {
