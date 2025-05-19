@@ -1,8 +1,8 @@
 import { useMutation } from "@apollo/client";
-import axios from "axios";
 import React, { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
+import { useUserStore } from "../store/userStore";
 
 type Message = {
   isUser: boolean;
@@ -22,10 +22,17 @@ const SubmitButton = ({ input }: { input: string }) => {
 };
 
 const Chat: React.FC = () => {
+  const { user, clearUser } = useUserStore();
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [chat] = useMutation(CHAT_MUTATION);
 
+  if (!user) {
+    clearUser();
+    window.location.href = "/login";
+    return null;
+  }
   const handleSend = async () => {
     if (!input.trim()) return;
     const userMessage: Message = { isUser: true, content: input };

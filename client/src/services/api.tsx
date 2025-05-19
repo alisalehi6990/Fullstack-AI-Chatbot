@@ -7,7 +7,20 @@ const api = axios.create({
 
 export interface AuthResponse {
   token: string;
+  user?: User;
   message: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  displayName?: string;
+  role: string;
+  isActive: boolean;
+}
+
+export interface VerifyResponse {
+  user: User;
 }
 
 export async function loginUser(userData: AuthFormData): Promise<AuthResponse> {
@@ -25,5 +38,21 @@ export async function registerUser(userData: AuthFormData): Promise<AuthResponse
     return response.data;
   } catch (error) {
     throw new Error("Registration failed");
+  }
+}
+
+export async function verifyToken(): Promise<VerifyResponse> {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+    
+    const response: AxiosResponse<VerifyResponse> = await api.get("/auth/verify", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error("Token verification failed");
   }
 }

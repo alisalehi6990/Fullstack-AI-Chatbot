@@ -17,6 +17,12 @@ model User {
   displayName       String?
   isActive          Boolean  @default(false)
   clerkId           String?
+  role              Role     @default(USER)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
 }

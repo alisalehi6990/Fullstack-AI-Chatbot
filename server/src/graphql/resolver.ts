@@ -2,7 +2,11 @@ import { ApolloError } from "apollo-server-express";
 
 const resolver = {
   Mutation: {
-    chat: async (_: any, { message }: { message: string }) => {
+    chat: async (_: any, { message }: { message: string }, context: any) => {
+      const { currentUser } = context;
+      if (!currentUser) {
+        throw new ApolloError("Authentication required", "UNAUTHENTICATED");
+      }
       try {
         // Simulate a chat response
         const reply = `You said: ${message}`;
