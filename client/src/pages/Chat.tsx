@@ -30,7 +30,7 @@ const Chat: React.FC = () => {
 
   if (!user) {
     clearUser();
-    window.location.href = "/login";
+    window.location.href = "/signin";
     return null;
   }
   const handleSend = async () => {

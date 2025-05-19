@@ -1,5 +1,5 @@
 // src/pages/AdminPanel.tsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { useUserStore } from "../store/userStore";
 
@@ -30,7 +30,7 @@ const AdminPanel: React.FC = () => {
   const { loading, error, data, refetch } = useQuery(GET_PENDING_USERS);
   if (!user) {
     clearUser();
-    window.location.href = "/login";
+    window.location.href = "/signin";
     return null;
   }
   const handleApprove = async (id: string) => {

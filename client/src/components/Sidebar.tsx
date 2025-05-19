@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useUserStore } from "../store/userStore";
 
 const Sidebar: React.FC = () => {
-  const { user } = useUserStore();
+  const { user, clearUser } = useUserStore();
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
@@ -72,6 +72,30 @@ const Sidebar: React.FC = () => {
               </Link>
             </li>
           )}
+          <li>
+            <Link
+              onClick={(e) => clearUser()}
+              to="#"
+              className={"flex items-center p-2 rounded hover:bg-gray-700"}
+            >
+              <svg
+                className="w-5 h-5 mr-3 text-gray-800 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 8h11m0 0-4-4m4 4-4 4m-5 3H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h3"
+                ></path>
+              </svg>
+              Logout
+            </Link>
+          </li>
         </ul>
       </nav>
 
@@ -91,4 +115,4 @@ const Sidebar: React.FC = () => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

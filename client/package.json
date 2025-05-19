@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@apollo/client": "^3.13.8",
+    "@clerk/clerk-react": "^5.31.4",
     "@prisma/client": "^4.16.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

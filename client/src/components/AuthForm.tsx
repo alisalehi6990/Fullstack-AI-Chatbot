@@ -5,16 +5,17 @@ import { Link } from "react-router-dom";
 
 interface AuthFormProps {
   title: string;
-  isLogin?: boolean;
-  onSubmit: (data: AuthFormData) => Promise<void>;
+  onLogin: (data: AuthFormData) => Promise<void>;
+  onRegister: (data: AuthFormData) => Promise<void>;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({ title, isLogin, onSubmit }) => {
+const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,8 +28,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, isLogin, onSubmit }) => {
     }
 
     try {
-      await onSubmit({ email, displayName, password, confirmPassword });
-      navigate("/chat");
+      if (isLogin) {
+        await onLogin({ email, password });
+        navigate("/chat");
+      } else {
+        await onRegister({ email, displayName, password, confirmPassword });
+        setIsLogin(true);
+      }
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     }
@@ -84,7 +90,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, isLogin, onSubmit }) => {
       <p className="mt-4 text-center">
         {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
         <Link
-          to={isLogin ? "/register" : "/login"}
+          to={"#"}
+          onClick={(e) => setIsLogin(!isLogin)}
           className="text-blue-500 hover:underline"
         >
           {isLogin ? "Register" : "Login"}
