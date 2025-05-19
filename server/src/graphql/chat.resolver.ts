@@ -1,6 +1,6 @@
 import { ApolloError } from "apollo-server-express";
 
-const resolver = {
+const chatResolvers = {
   Mutation: {
     chat: async (_: any, { message }: { message: string }, context: any) => {
       const { currentUser } = context;
@@ -20,4 +20,5 @@ const resolver = {
     },
   },
 };
-export default resolver;
+
+export default chatResolvers; 

@@ -12,7 +12,7 @@ export const context = async ({ req }: ExpressContext) => {
     try {
       const decoded: any = jwt.verify(token, JWT_SECRET);
       const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
+        where: { id: decoded.id },
       });
 
       if (user && user.isActive) {

@@ -3,10 +3,21 @@ type Message {
   aiResponse: String!
 }
 
+type User {
+  id: ID!
+  email: String
+  displayName: String
+  isActive: Boolean
+  role: String
+  createdAt: String
+}
+
 type Query {
-  dummy: String
+  pendingUsers: [User!]!
 }
 
 type Mutation {
   chat(message: String!): Message!
+  approveUser(id: ID!): User!
+  removeUser(id: ID!): User!
 }

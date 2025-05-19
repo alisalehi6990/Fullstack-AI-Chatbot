@@ -6,8 +6,8 @@ import morgan from "morgan";
 import authRoutes from "./routes/auth.route";
 import { ApolloServer } from "apollo-server-express";
 // GraphQL imports
-import resolvers from "./graphql/resolver";
-import { context } from "./graphql/context";
+import resolvers from "./graphql/resolvers";
+import { context } from "./middlewares/auth.middleware";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
