@@ -1,4 +1,5 @@
 import { ApolloError } from "apollo-server-express";
+import { queryOllama } from "../services/llm.service";
 
 const chatResolvers = {
   Mutation: {
@@ -8,8 +9,7 @@ const chatResolvers = {
         throw new ApolloError("Authentication required", "UNAUTHENTICATED");
       }
       try {
-        // Simulate a chat response
-        const reply = `You said: ${message}`;
+        const reply = await queryOllama(message);
         return {
           userMessage: message,
           aiResponse: reply,
@@ -21,4 +21,4 @@ const chatResolvers = {
   },
 };
 
-export default chatResolvers; 
+export default chatResolvers;

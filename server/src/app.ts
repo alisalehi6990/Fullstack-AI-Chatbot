@@ -3,14 +3,17 @@ import cors from "cors";
 import helmet from "helmet";
 import { PrismaClient } from "@prisma/client";
 import morgan from "morgan";
-import authRoutes from "./routes/auth.route";
 import { ApolloServer } from "apollo-server-express";
-// GraphQL imports
-import resolvers from "./graphql/resolvers";
-import { context } from "./middlewares/auth.middleware";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+
+// Express Routes
+import authRoutes from "./routes/auth.route";
+
+// GraphQL imports
+import resolvers from "./graphql/resolvers";
+import { context } from "./middlewares/auth.middleware";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -41,7 +44,9 @@ await server.start();
 server.applyMiddleware({ app, path: "/graphql" });
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello from ChatBot Backend!");
+  res.send(
+    "Wellcome dear friend, to AI Chatbot backend. There isn't much here for you, but you can check my GitHub for the codes: https://github.com/alisalehi6990"
+  );
 });
 
 app.use("/auth", authRoutes);
