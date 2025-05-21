@@ -1,19 +1,27 @@
 import { ApolloError } from "apollo-server-express";
 import { queryOllama } from "../services/llm.service";
-type Message = {
-  isUser: boolean;
+import { prisma } from "../app";
+
+type Prompt = {
+  role: string;
   content: string;
 };
+
+function isValidObjectId(id: string): boolean {
+  const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+  return objectIdRegex.test(id);
+}
+
 const chatResolvers = {
   Mutation: {
     chat: async (
       _: any,
       {
+        sessionId,
         message,
-        chatHistory,
       }: {
+        sessionId?: string;
         message: string;
-        chatHistory: Message[];
       },
       context: any
     ) => {
@@ -23,6 +31,28 @@ const chatResolvers = {
       }
 
       try {
+        let chatSession;
+
+        if (sessionId && isValidObjectId(sessionId)) {
+          const existingSession = await prisma.chatHistory.findUnique({
+            where: {
+              id: sessionId,
+            },
+          });
+          if (existingSession) {
+            chatSession = existingSession;
+          }
+        }
+        if (!chatSession) {
+          chatSession = await prisma.chatHistory.create({
+            data: {
+              userId: currentUser.id,
+              messages: [],
+            },
+          });
+        }
+
+        const prompt: Prompt[] = [];
         const systemPrompt = {
           role: "system",
           content: "You are a helpful customer support",
@@ -33,20 +63,36 @@ const chatResolvers = {
             currentUser
           )}`,
         };
-        const mappedChatHistory = chatHistory.map((message) => ({
-          role: message.isUser ? "human" : "ai",
-          content: message.content,
-        }));
+        const mappedChatHistory = Array.isArray(chatSession.messages) ? chatSession.messages as Prompt[] : [];
 
-        const reply = await queryOllama([
-          systemPrompt,
-          userInfo,
-          ...mappedChatHistory,
+        prompt.push(systemPrompt);
+        prompt.push(userInfo);
+        prompt.push(...mappedChatHistory);
+        prompt.push({ role: "human", content: message });
+
+        const reply = await queryOllama(prompt);
+
+        const currentMessages = Array.isArray(chatSession.messages)
+          ? chatSession.messages
+          : [];
+
+        const updatedMessages = [
+          ...currentMessages,
           { role: "human", content: message },
-        ]);
+          { role: "ai", content: reply },
+        ];
+        await prisma.chatHistory.update({
+          where: { id: chatSession.id },
+          data: {
+            messages: updatedMessages,
+          },
+        });
         return {
-          userMessage: message,
+          messages: prompt
+            .filter((p) => p.role !== "system")
+            .map((p) => ({ content: p.content, isUser: p.role === "human" })),
           aiResponse: reply,
+          sessionId: chatSession?.id || "123",
         };
       } catch (error: any) {
         throw new ApolloError(error.message);

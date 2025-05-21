@@ -12,6 +12,7 @@ const Chat: React.FC = () => {
   const { user, clearUser } = useUserStore();
 
   const [messages, setMessages] = useState<Message[]>([]);
+  const [sessionId, setSessionId] = useState("");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
   const [chat] = useMutation(CHAT_MUTATION);
@@ -38,7 +39,10 @@ const Chat: React.FC = () => {
 
     try {
       const res = await chat({
-        variables: { chatHistory: messages, message: input },
+        variables: {
+          message: input,
+          sessionId,
+        },
       });
 
       const botMessage: Message = {
@@ -47,6 +51,7 @@ const Chat: React.FC = () => {
       };
 
       setMessages((prev) => [...prev, botMessage]);
+      setSessionId(res.data.chat.sessionId);
       scrollToBottom();
 
       setLoading(false);
