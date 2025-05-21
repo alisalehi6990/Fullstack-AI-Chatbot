@@ -2,7 +2,10 @@ type Message {
   userMessage: String!
   aiResponse: String!
 }
-
+input ChatHistoryInput {
+  isUser: Boolean!
+  content: String!
+}
 type User {
   id: ID!
   email: String
@@ -17,7 +20,7 @@ type Query {
 }
 
 type Mutation {
-  chat(message: String!): Message!
+  chat(message: String!, chatHistory: [ChatHistoryInput!]!): Message!
   approveUser(id: ID!): User!
   removeUser(id: ID!): User!
 }

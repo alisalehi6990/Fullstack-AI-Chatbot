@@ -37,7 +37,9 @@ const Chat: React.FC = () => {
     scrollToBottom();
 
     try {
-      const res = await chat({ variables: { message: input } });
+      const res = await chat({
+        variables: { chatHistory: messages, message: input },
+      });
 
       const botMessage: Message = {
         content: res.data.chat.aiResponse,

@@ -44,10 +44,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
     }
   };
 
-  const alitest = async () => {
-    await signOut({ redirectUrl: '' });
-  };
-
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
@@ -108,7 +104,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
       </p>
 
       <ClerkSignInButton />
-      <button onClick={(e) => alitest()}>ALI TEST</button>
     </div>
   );
 };
