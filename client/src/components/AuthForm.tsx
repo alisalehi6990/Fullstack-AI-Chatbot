@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { AuthFormData } from "../types/auth";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import ClerkSignInButton from "./ClerkSignInButton";
+import { useAuth } from "@clerk/clerk-react";
 
 interface AuthFormProps {
   title: string;
@@ -11,14 +12,16 @@ interface AuthFormProps {
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
-  const [error, setError] = useState("");
+  const { state } = useLocation();
+  console.log(state)
+  const [error, setError] = useState(state?.errorMessage || "");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
-
+  const { signOut } = useAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -40,6 +43,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
       setError(err.message || "Something went wrong");
     }
   };
+
+  const alitest = async () => {
+    await signOut({ redirectUrl: '' });
+  };
+
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
@@ -100,6 +108,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
       </p>
 
       <ClerkSignInButton />
+      <button onClick={(e) => alitest()}>ALI TEST</button>
     </div>
   );
 };

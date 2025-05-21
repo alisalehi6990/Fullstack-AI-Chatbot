@@ -25,16 +25,24 @@ export interface VerifyResponse {
 
 export async function loginUser(userData: AuthFormData): Promise<AuthResponse> {
   try {
-    const response: AxiosResponse<AuthResponse> = await api.post("/auth/login", userData);
+    const response: AxiosResponse<AuthResponse> = await api.post(
+      "/auth/login",
+      userData
+    );
     return response.data;
-  } catch (error) {
-    throw new Error("Login failed");
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Login failed");
   }
 }
 
-export async function registerUser(userData: AuthFormData): Promise<AuthResponse> {
+export async function registerUser(
+  userData: AuthFormData
+): Promise<AuthResponse> {
   try {
-    const response: AxiosResponse<AuthResponse> = await api.post("/auth/register", userData);
+    const response: AxiosResponse<AuthResponse> = await api.post(
+      "/auth/register",
+      userData
+    );
     return response.data;
   } catch (error) {
     throw new Error("Registration failed");
@@ -45,12 +53,15 @@ export async function verifyToken(): Promise<VerifyResponse> {
   try {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No token found");
-    
-    const response: AxiosResponse<VerifyResponse> = await api.get("/auth/verify", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+
+    const response: AxiosResponse<VerifyResponse> = await api.get(
+      "/auth/verify",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     throw new Error("Token verification failed");
@@ -63,9 +74,12 @@ export async function clerkSignIn(userData: {
   displayName: string | null;
 }): Promise<AuthResponse> {
   try {
-    const response: AxiosResponse<AuthResponse> = await api.post("/auth/clerk", userData);
+    const response: AxiosResponse<AuthResponse> = await api.post(
+      "/auth/clerk",
+      userData
+    );
     return response.data;
-  } catch (error) {
-    throw new Error("Login failed");
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Login failed");
   }
 }

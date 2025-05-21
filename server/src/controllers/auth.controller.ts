@@ -50,7 +50,7 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     if (!user.isActive) {
-      res.status(403).json({ message: "User is not active" });
+      res.status(403).json({ message: "Account is not active" });
       return;
     }
 
@@ -98,7 +98,7 @@ export const verifyToken = async (req: Request, res: Response) => {
     }
 
     if (!user.isActive) {
-      res.status(403).json({ message: "User is not active" });
+      res.status(403).json({ message: "Account is not active" });
       return;
     }
 
@@ -130,11 +130,13 @@ export const clerkSignIn = async (req: Request, res: Response) => {
     } else if (!user.clerkId) {
       await prisma.user.update({
         where: { email },
-        data: { clerkId },
+        data: { clerkId, isActive: true },
       });
+      user.isActive = true;
     }
     if (!user.isActive) {
-      res.status(403).json({ error: "Account not activated" });
+      res.status(403).json({ message: "Account is not active" });
+      return;
     }
     const token = jwt.sign({ id: user.id }, JWT_SECRET, {
       expiresIn: "1d",

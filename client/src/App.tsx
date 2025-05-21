@@ -42,8 +42,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<SigninPage />} />
           <Route path="/clerk-callback" element={<ClerkCallbackPage />} />
+          <Route path="/" element={<SigninPage />} />
         </Routes>
       </BrowserRouter>
     </ApolloProvider>

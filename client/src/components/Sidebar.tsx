@@ -94,7 +94,7 @@ const Sidebar: React.FC = () => {
                   d="M4 8h11m0 0-4-4m4 4-4 4m-5 3H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h3"
                 ></path>
               </svg>
-              <SignOutButton />
+              <SignOutButton signOutOptions={{ redirectUrl: "" }} />
             </Link>
           </li>
         </ul>

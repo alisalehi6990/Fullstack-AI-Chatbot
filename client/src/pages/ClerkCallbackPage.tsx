@@ -6,13 +6,15 @@ import { clerkSignIn } from "../services/api";
 
 const ClerkCallbackPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, signOut, isLoaded } = useAuth();
   const { user } = useUser();
   const setUser = useUserStore((state) => state.setUser);
+  const clearUser = useUserStore((state) => state.clearUser);
 
   useEffect(() => {
     const syncWithBackend = async () => {
-      if (!isSignedIn || !user || !user.primaryEmailAddress) return;
+      if (!isSignedIn || !user || !user.primaryEmailAddress || !isLoaded)
+        return;
 
       try {
         const response = await clerkSignIn({
@@ -38,15 +40,15 @@ const ClerkCallbackPage: React.FC = () => {
 
         // // Redirect to chat
         navigate("/chat");
-      } catch (error) {
-        console.error("Failed to sync with backend:", error);
-        alert("Login successful but failed to connect to your system.");
-        navigate("/signin");
+      } catch (error: any) {
+        await signOut({ redirectUrl: "/signin" });
+        clearUser();
+        navigate("/signin", { state: { errorMessage: error.message } });
       }
     };
 
     syncWithBackend();
-  }, [isSignedIn, user, navigate, setUser]);
+  }, [isSignedIn, user, navigate, setUser, clearUser, signOut, isLoaded]);
 
   return (
     <div className="flex justify-center items-center h-screen">
