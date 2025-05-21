@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useUserStore } from "../store/userStore";
 import { loginUser, registerUser } from "../services/api";
 import AuthForm from "../components/AuthForm";

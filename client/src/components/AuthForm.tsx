@@ -3,7 +3,6 @@ import { AuthFormData } from "../types/auth";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import ClerkSignInButton from "./ClerkSignInButton";
-import { useAuth } from "@clerk/clerk-react";
 
 interface AuthFormProps {
   title: string;
@@ -13,7 +12,6 @@ interface AuthFormProps {
 
 const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
   const { state } = useLocation();
-  console.log(state)
   const [error, setError] = useState(state?.errorMessage || "");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +19,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
-  const { signOut } = useAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
