@@ -32,7 +32,7 @@ const AuthRedirect: React.FC<AuthRedirectProps> = ({ children }) => {
   }
 
   if (user) {
-    return <Navigate to="/chat" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

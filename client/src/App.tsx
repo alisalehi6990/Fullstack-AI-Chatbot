@@ -8,43 +8,49 @@ import AuthRedirect from "./components/AuthRedirect";
 import Layout from "./components/Layout";
 import SigninPage from "./pages/Signin";
 import ClerkCallbackPage from "./pages/ClerkCallbackPage";
+import HomePage from "./pages/Home";
 
 function App() {
   return (
     <ApolloProvider client={client}>
       <BrowserRouter>
-        <Routes>
-          <Route
-            path="/signin"
-            element={
-              <AuthRedirect>
-                <SigninPage />
-              </AuthRedirect>
-            }
-          />
-          <Route
-            path="/chat"
-            element={
-              <ProtectedRoute>
-                <Layout>
+        <Layout>
+          <Routes>
+            <Route
+              path="/signin"
+              element={
+                <AuthRedirect>
+                  <SigninPage />
+                </AuthRedirect>
+              }
+            />
+            <Route
+              path="/chat"
+              element={
+                <ProtectedRoute>
                   <Chat />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute requiredRole="ADMIN">
-                <Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requiredRole="ADMIN">
                   <AdminPanel />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/clerk-callback" element={<ClerkCallbackPage />} />
-          <Route path="/" element={<SigninPage />} />
-        </Routes>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/clerk-callback" element={<ClerkCallbackPage />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Layout>
       </BrowserRouter>
     </ApolloProvider>
   );

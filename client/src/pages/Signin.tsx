@@ -7,7 +7,7 @@ import { AuthFormData } from "../types/auth";
 const SigninPage: React.FC = () => {
   const { user, setUser } = useUserStore();
   if (user) {
-    return <Navigate to="/chat" replace />;
+    return <Navigate to="/" replace />;
   }
   const handleLogin = async (data: { email: string; password: string }) => {
     const response = await loginUser(data);

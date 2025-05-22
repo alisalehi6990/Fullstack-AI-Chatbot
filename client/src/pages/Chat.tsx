@@ -1,7 +1,8 @@
 import { useMutation } from "@apollo/client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
 import { useUserStore } from "../store/userStore";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 type Message = {
   isUser: boolean;
@@ -10,20 +11,42 @@ type Message = {
 
 const Chat: React.FC = () => {
   const { user, clearUser } = useUserStore();
-
+  const [searchParams] = useSearchParams();
+  const [sessionId, setSessionId] = useState(searchParams.get("c") || "");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [sessionId, setSessionId] = useState("");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
   const [chat] = useMutation(CHAT_MUTATION);
+  const navigate = useNavigate();
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const loadingMessageRef = useRef<HTMLDivElement>(null);
-  if (!user) {
-    clearUser();
-    window.location.href = "/signin";
-    return null;
-  }
+
+  useEffect(() => {
+    if (!user) {
+      clearUser();
+      navigate("/signin");
+    }
+    const sessionIdInParam = searchParams.get("c");
+    if (sessionIdInParam && sessionId !== sessionIdInParam) {
+      setSessionId(sessionIdInParam);
+      return;
+    }
+    if (!sessionId) {
+      navigate("/");
+    }
+    const existingChat = user!.chatHistories?.find(
+      (chat) => chat.id === sessionId
+    );
+    if (existingChat) {
+      setMessages(existingChat.messages);
+      scrollToBottom();
+    } else {
+      navigate("/");
+    }
+    scrollToBottom();
+  }, [user, sessionId, clearUser, searchParams, navigate]);
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -51,7 +74,10 @@ const Chat: React.FC = () => {
       };
 
       setMessages((prev) => [...prev, botMessage]);
-      setSessionId(res.data.chat.sessionId);
+      if (sessionId === "") {
+        setSessionId(res.data.chat.sessionId);
+        searchParams.set("c", res.data.chat.sessionId);
+      }
       scrollToBottom();
 
       setLoading(false);

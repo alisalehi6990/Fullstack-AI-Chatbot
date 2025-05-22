@@ -8,40 +8,18 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
-
   return (
     <div className="w-64 h-screen bg-gray-800 text-white flex flex-col">
       {/* Logo */}
       <div className="p-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold">AI ChatBot</h1>
+        <h1 className="text-2xl font-bold">
+          <Link to="/">AI ChatBot</Link>
+        </h1>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
-          <li>
-            <Link
-              to="/chat"
-              className={`flex items-center p-2 rounded hover:bg-gray-700 ${
-                isActive("/chat") ? "bg-gray-700" : ""
-              }`}
-            >
-              <svg
-                className="w-5 h-5 mr-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                />
-              </svg>
-              Chat
-            </Link>
-          </li>
           {user?.role === "ADMIN" && (
             <li>
               <Link
@@ -73,14 +51,62 @@ const Sidebar: React.FC = () => {
               </Link>
             </li>
           )}
-          <li>
-            <Link
-              onClick={(e) => clearUser()}
-              to="#"
-              className={"flex items-center p-2 rounded hover:bg-gray-700"}
-            >
+        </ul>
+      </nav>
+
+      {user && user?.chatHistories && user.chatHistories.length > 0 && (
+        <nav className="overflow-auto p-4">
+          <ul className="space-y-2">
+            <li className="flex items-center">
               <svg
-                className="w-5 h-5 mr-3 text-gray-800 dark:text-white"
+                className="w-5 h-5 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+              Chat history
+            </li>
+            {user.chatHistories.map((chat, index) => (
+              <li key={index}>
+                <Link
+                  to={`/chat?c=${chat.id}`}
+                  replace
+                  className={"flex items-center p-2 rounded hover:bg-gray-700"}
+                >
+                  {chat.messages[0].content.substring(0, 10)}...
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      {/* User Info */}
+      {user && (
+        <div className="border-gray-700 border-t flex justify-between p-4">
+          <div className="flex items-center">
+            <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center mr-3">
+              {user?.displayName?.[0] || user?.email?.[0] || "U"}
+            </div>
+            <div>
+              <p className="font-medium">{user?.displayName || user?.email}</p>
+              <p className="text-sm text-gray-400">{user?.role}</p>
+            </div>
+          </div>
+          <div
+            onClick={(e) => clearUser()}
+            className="flex items-center p-2 rounded hover:bg-gray-700 cursor-pointer"
+          >
+            <SignOutButton signOutOptions={{ redirectUrl: "" }}>
+              <svg
+                className="w-5 h-5 text-gray-800 dark:text-white"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -94,24 +120,10 @@ const Sidebar: React.FC = () => {
                   d="M4 8h11m0 0-4-4m4 4-4 4m-5 3H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h3"
                 ></path>
               </svg>
-              <SignOutButton signOutOptions={{ redirectUrl: "" }} />
-            </Link>
-          </li>
-        </ul>
-      </nav>
-
-      {/* User Info */}
-      <div className="p-4 border-t border-gray-700">
-        <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center mr-3">
-            {user?.displayName?.[0] || user?.email?.[0] || "U"}
-          </div>
-          <div>
-            <p className="font-medium">{user?.displayName || user?.email}</p>
-            <p className="text-sm text-gray-400">{user?.role}</p>
+            </SignOutButton>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

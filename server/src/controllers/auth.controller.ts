@@ -89,6 +89,16 @@ export const verifyToken = async (req: Request, res: Response) => {
         displayName: true,
         role: true,
         isActive: true,
+        chatHistories: {
+          select: {
+            id: true,
+            messages: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 5,
+        },
       },
     });
 
@@ -101,7 +111,13 @@ export const verifyToken = async (req: Request, res: Response) => {
       res.status(403).json({ message: "Account is not active" });
       return;
     }
-
+    user.chatHistories.forEach(
+      (chat) =>
+        (chat.messages = (chat.messages as any[]).map((message) => ({
+          content: message.content,
+          isUser: message.role === "human",
+        })))
+    );
     res.status(200).json({ user });
   } catch (error) {
     console.error("Error verifying token:", error);

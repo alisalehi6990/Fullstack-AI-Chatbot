@@ -31,7 +31,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ title, onLogin, onRegister }) => {
     try {
       if (isLogin) {
         await onLogin({ email, password });
-        navigate("/chat");
+        navigate("/");
       } else {
         await onRegister({ email, displayName, password, confirmPassword });
         setIsLogin(true);

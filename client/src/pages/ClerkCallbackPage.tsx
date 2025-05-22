@@ -24,22 +24,21 @@ const ClerkCallbackPage: React.FC = () => {
         });
 
         const { token } = response;
-        console.log(response);
+
         localStorage.setItem("token", token);
 
-        // // Save user to Zustand store
         setUser(
           {
             id: user.id,
             email: user.primaryEmailAddress.emailAddress,
             displayName: user.fullName || undefined,
             role: "USER",
+            isActive: true,
           },
           token
         );
 
-        // // Redirect to chat
-        navigate("/chat");
+        navigate("/");
       } catch (error: any) {
         await signOut({ redirectUrl: "/signin" });
         clearUser();

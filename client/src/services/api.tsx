@@ -17,6 +17,13 @@ export interface User {
   displayName?: string;
   role: string;
   isActive: boolean;
+  chatHistories?: {
+    id: string;
+    messages: {
+      isUser: boolean;
+      content: string;
+    }[];
+  }[];
 }
 
 export interface VerifyResponse {
