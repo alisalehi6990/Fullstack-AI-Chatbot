@@ -4,7 +4,7 @@ import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
 import { useUserStore } from "../store/userStore";
 import { useNavigate } from "react-router-dom";
 
-type Message = {
+export type Message = {
   isUser: boolean;
   content: string;
 };

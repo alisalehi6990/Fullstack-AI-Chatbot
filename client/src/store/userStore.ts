@@ -1,11 +1,9 @@
 import { create } from "zustand";
+import { Message } from "../pages/Home";
 
 type Chat = {
   id: string;
-  messages: {
-    isUser: boolean;
-    content: string;
-  }[];
+  messages: Message[];
 };
 interface User {
   id: string;

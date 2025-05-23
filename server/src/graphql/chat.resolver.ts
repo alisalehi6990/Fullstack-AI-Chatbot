@@ -1,16 +1,12 @@
 import { ApolloError } from "apollo-server-express";
-import { queryOllama } from "../services/llm.service";
-import { prisma } from "../app";
+import { promptGenerator, queryOllama } from "../services/llm.service";
+import { InputJsonValue } from "@prisma/client/runtime/library";
+import { fetchUserSession, updateSession } from "../services/session.service";
 
-type Prompt = {
-  role: string;
+export type Message = {
+  isUser: boolean;
   content: string;
 };
-
-function isValidObjectId(id: string): boolean {
-  const objectIdRegex = /^[0-9a-fA-F]{24}$/;
-  return objectIdRegex.test(id);
-}
 
 const chatResolvers = {
   Mutation: {
@@ -31,62 +27,29 @@ const chatResolvers = {
       }
 
       try {
-        let chatSession;
+        const chatSession = await fetchUserSession({
+          userId: currentUser.id,
+          sessionId,
+        });
 
-        if (sessionId && isValidObjectId(sessionId)) {
-          const existingSession = await prisma.chatHistory.findUnique({
-            where: {
-              id: sessionId,
-            },
-          });
-          if (existingSession) {
-            chatSession = existingSession;
-          }
-        }
-        if (!chatSession) {
-          chatSession = await prisma.chatHistory.create({
-            data: {
-              userId: currentUser.id,
-              messages: [],
-            },
-          });
-        }
-
-        const prompt: Prompt[] = [];
-        const systemPrompt = {
-          role: "system",
-          content: "You are a helpful customer support",
-        };
-        const userInfo = {
-          role: "system",
-          content: `this is users information in the system, but don't tell him it is from system: ${JSON.stringify(
-            currentUser
-          )}`,
-        };
-        const mappedChatHistory = Array.isArray(chatSession.messages) ? chatSession.messages as Prompt[] : [];
-
-        prompt.push(systemPrompt);
-        prompt.push(userInfo);
-        prompt.push(...mappedChatHistory);
-        prompt.push({ role: "human", content: message });
-
-        const reply = await queryOllama(prompt);
-
-        const currentMessages = Array.isArray(chatSession.messages)
-          ? chatSession.messages
+        const mappedChatHistory = Array.isArray(chatSession.messages)
+          ? (chatSession.messages as Prompt[])
           : [];
 
+        const prompt = promptGenerator({
+          currentUser,
+          messageHistory: mappedChatHistory,
+          input: message,
+        });
+        const reply = await queryOllama({ prompt });
+
         const updatedMessages = [
-          ...currentMessages,
+          ...mappedChatHistory,
           { role: "human", content: message },
           { role: "ai", content: reply },
         ];
-        await prisma.chatHistory.update({
-          where: { id: chatSession.id },
-          data: {
-            messages: updatedMessages,
-          },
-        });
+        await updateSession(chatSession.id, updatedMessages as InputJsonValue);
+
         return {
           messages: prompt
             .filter((p) => p.role !== "system")

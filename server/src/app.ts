@@ -7,13 +7,14 @@ import { ApolloServer } from "apollo-server-express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-
+import compression from "compression";
 // Express Routes
 import authRoutes from "./routes/auth.route";
+import chatRouter from "./routes/chat.route";
 
 // GraphQL imports
 import resolvers from "./graphql/resolvers";
-import { context } from "./middlewares/auth.middleware";
+import { attachCurrentUserMiddleware, context } from "./middlewares/auth.middleware";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
+app.use(compression());
 
 export const prisma = new PrismaClient();
 
@@ -49,7 +51,10 @@ app.get("/", (req: Request, res: Response) => {
   );
 });
 
+app.use(attachCurrentUserMiddleware);
+
 app.use("/auth", authRoutes);
+app.use("/chat", chatRouter);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

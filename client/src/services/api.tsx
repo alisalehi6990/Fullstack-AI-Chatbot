@@ -1,7 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import { AuthFormData } from "../types/auth";
+import { Message } from "../pages/Home";
 
-const api = axios.create({
+export const apiService = axios.create({
   baseURL: "http://localhost:4000",
 });
 
@@ -19,10 +20,7 @@ export interface User {
   isActive: boolean;
   chatHistories?: {
     id: string;
-    messages: {
-      isUser: boolean;
-      content: string;
-    }[];
+    messages: Message[];
   }[];
 }
 
@@ -32,7 +30,7 @@ export interface VerifyResponse {
 
 export async function loginUser(userData: AuthFormData): Promise<AuthResponse> {
   try {
-    const response: AxiosResponse<AuthResponse> = await api.post(
+    const response: AxiosResponse<AuthResponse> = await apiService.post(
       "/auth/login",
       userData
     );
@@ -46,7 +44,7 @@ export async function registerUser(
   userData: AuthFormData
 ): Promise<AuthResponse> {
   try {
-    const response: AxiosResponse<AuthResponse> = await api.post(
+    const response: AxiosResponse<AuthResponse> = await apiService.post(
       "/auth/register",
       userData
     );
@@ -61,7 +59,7 @@ export async function verifyToken(): Promise<VerifyResponse> {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No token found");
 
-    const response: AxiosResponse<VerifyResponse> = await api.get(
+    const response: AxiosResponse<VerifyResponse> = await apiService.get(
       "/auth/verify",
       {
         headers: {
@@ -81,7 +79,7 @@ export async function clerkSignIn(userData: {
   displayName: string | null;
 }): Promise<AuthResponse> {
   try {
-    const response: AxiosResponse<AuthResponse> = await api.post(
+    const response: AxiosResponse<AuthResponse> = await apiService.post(
       "/auth/clerk",
       userData
     );

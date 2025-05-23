@@ -3,11 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
 import { useUserStore } from "../store/userStore";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
-type Message = {
-  isUser: boolean;
-  content: string;
-};
+import { Message } from "./Home";
 
 const Chat: React.FC = () => {
   const { user, clearUser } = useUserStore();
@@ -15,7 +11,10 @@ const Chat: React.FC = () => {
   const [sessionId, setSessionId] = useState(searchParams.get("c") || "");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [streaming, setStreaming] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [aiTyping, setAiTyping] = useState<boolean>(false);
+
   const [chat] = useMutation(CHAT_MUTATION);
   const navigate = useNavigate();
 
@@ -23,10 +22,6 @@ const Chat: React.FC = () => {
   const loadingMessageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!user) {
-      clearUser();
-      navigate("/signin");
-    }
     const sessionIdInParam = searchParams.get("c");
     if (sessionIdInParam && sessionId !== sessionIdInParam) {
       setSessionId(sessionIdInParam);
@@ -48,35 +43,89 @@ const Chat: React.FC = () => {
   }, [user, sessionId, clearUser, searchParams, navigate]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || aiTyping) return;
 
     const userMessage: Message = { isUser: true, content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
-    if (loadingMessageRef.current) {
-      (loadingMessageRef.current as HTMLDivElement).style.display = "block";
-    }
     scrollToBottom();
 
     try {
-      const res = await chat({
-        variables: {
-          message: input,
-          sessionId,
-        },
-      });
+      if (streaming) {
+        const token = localStorage.getItem("token");
 
-      const botMessage: Message = {
-        content: res.data.chat.aiResponse,
-        isUser: false,
-      };
+        const response = await fetch("http://localhost:4000/chat/stream", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            message: input,
+            sessionId,
+          }),
+        });
 
-      setMessages((prev) => [...prev, botMessage]);
-      if (sessionId === "") {
-        setSessionId(res.data.chat.sessionId);
-        searchParams.set("c", res.data.chat.sessionId);
+        if (!response.ok || !response.body) {
+          throw new Error("Stream failed");
+        }
+        setLoading(false);
+        setAiTyping(true);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let aiResponse = "";
+        const botMessage: Message = {
+          content: "",
+          isUser: false,
+        };
+        setMessages((prev) => [...prev, botMessage]);
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk
+            .split("\n")
+            .filter((line: string) => line.startsWith("data: "));
+
+          for (const line of lines) {
+            const jsonStr = line.replace("data: ", "").trim();
+            const parsed = JSON.parse(jsonStr);
+            aiResponse += parsed.content;
+            botMessage.content = aiResponse;
+            setMessages((prev) => {
+              const updatedMessages = [...prev];
+              updatedMessages[updatedMessages.length - 1] = botMessage;
+              return updatedMessages;
+            });
+            scrollToBottom();
+          }
+        }
+        setAiTyping(false);
+      } else {
+        if (loadingMessageRef.current) {
+          (loadingMessageRef.current as HTMLDivElement).style.display = "block";
+        }
+        scrollToBottom();
+        const res = await chat({
+          variables: {
+            message: input,
+            sessionId,
+          },
+        });
+
+        const botMessage: Message = {
+          content: res.data.chat.aiResponse,
+          isUser: false,
+        };
+
+        setMessages((prev) => [...prev, botMessage]);
+        if (sessionId === "") {
+          setSessionId(res.data.chat.sessionId);
+          searchParams.set("c", res.data.chat.sessionId);
+        }
       }
       scrollToBottom();
 
@@ -136,7 +185,7 @@ const Chat: React.FC = () => {
       </div>
 
       <div className="p-4 bg-white border-t">
-        <div onSubmit={handleSend} className="flex space-x-2">
+        <div className="flex space-x-2">
           <input
             type="text"
             value={input}
@@ -152,6 +201,15 @@ const Chat: React.FC = () => {
           >
             Send
           </button>
+        </div>
+        <div className="flex w-full">
+          <input
+            type="checkbox"
+            checked={streaming}
+            onChange={(e) => setStreaming(e.target.checked)}
+            className="mr-2"
+          />
+          <label htmlFor="">Enable Streaming</label>
         </div>
       </div>
     </div>
