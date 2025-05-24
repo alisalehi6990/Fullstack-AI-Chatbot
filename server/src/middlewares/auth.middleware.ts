@@ -47,5 +47,5 @@ export const attachCurrentUserMiddleware = async (
     req.currentUser = await findCurrentUser(authHeader);
   }
 
-  next(); // Proceed to the next middleware or route
+  next();
 };

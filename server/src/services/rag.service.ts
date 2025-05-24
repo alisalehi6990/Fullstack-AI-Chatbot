@@ -6,6 +6,10 @@ export async function processAndStoreChunks(
   documentId: string,
   chunks: string[]
 ) {
+  const collection = process.env.QDRANT_COLLECTION;
+  if (!collection) {
+    throw new Error("Collection is not defined!!");
+  }
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
     const vector = await getEmbeddings(chunk);
@@ -19,7 +23,7 @@ export async function processAndStoreChunks(
         documentId,
         chunkIndex: i,
       },
-      collection: "AiChatBot",
+      collection,
     });
   }
 }

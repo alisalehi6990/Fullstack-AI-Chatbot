@@ -12,10 +12,14 @@ async function getClient() {
     url: process.env.QDRANT_URL,
     apiKey: process.env.QDRANT_API_KEY,
   });
-  // await qdrantClient.collectionExists("AiChatBot").then((response) => {
+  // const collection = process.env.QDRANT_COLLECTION;
+  // if (!collection) {
+  //   throw new Error("Collection is not defined!!");
+  // }
+  // await qdrantClient.collectionExists(collection).then((response) => {
   //   if (!response.exists) {
   //     qdrantClient
-  //     .createCollection("AiChatBot", {
+  //     .createCollection(collection, {
   //       vectors: { size: 1024, distance: "Cosine" },
   //     })
   //     .then((response) => {
@@ -67,10 +71,13 @@ async function addPointToQdrant(data: {
     });
 }
 
-
 async function searchQdrant(queryVector: number[], limit = 5) {
   const client = await getClient();
-  const result = await client.search("AiChatBot", {
+  const collection = process.env.QDRANT_COLLECTION;
+  if (!collection) {
+    throw new Error("Collection is not defined!!");
+  }
+  const result = await client.search(collection, {
     vector: queryVector,
     limit,
   });

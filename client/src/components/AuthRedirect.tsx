@@ -28,7 +28,7 @@ const AuthRedirect: React.FC<AuthRedirectProps> = ({ children }) => {
   }, [user, setUser, clearUser]);
 
   if (isLoading) {
-    return <div>Loading...</div>; // You can replace this with a proper loading component
+    return <div>Loading...</div>;
   }
 
   if (user) {

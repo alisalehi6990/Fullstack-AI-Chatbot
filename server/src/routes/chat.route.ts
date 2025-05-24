@@ -20,8 +20,8 @@ type Prompt = {
 };
 
 router.post("/stream", async (req: Request, res: Response) => {
-  const currentUser = req.currentUser;
   const { message, sessionId } = req.body;
+  const currentUser = req.currentUser;
   if (!currentUser) {
     throw new ApolloError("Authentication required", "UNAUTHENTICATED");
   }
@@ -77,6 +77,10 @@ router.post(
     res: Response
   ): Promise<void> => {
     try {
+      const currentUser = req.currentUser;
+      if (!currentUser) {
+        throw new ApolloError("Authentication required", "UNAUTHENTICATED");
+      }
       const buffer = req.file?.buffer;
       if (!buffer) {
         res.status(400).json({ error: "No file uploaded" });
@@ -98,7 +102,6 @@ router.post(
       const documentId = uuidv4();
       res.json({ message: "Document processed and stored", documentId });
       await processAndStoreChunks(documentId, chunks);
-
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
