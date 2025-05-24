@@ -1,4 +1,4 @@
-import getOllamaConnection from "./ollama.service";
+import { getQueryConnection, getEmbeddingsConnection } from "./ollama.service";
 
 type Prompt = {
   role: string;
@@ -16,7 +16,7 @@ export async function queryOllama({
   model = "llama3",
   streaming = false,
 }: QueryOllamaProps) {
-  const llmConnection = getOllamaConnection(model);
+  const llmConnection = getQueryConnection(model);
 
   if (streaming) {
     return await llmConnection.stream(prompt);
@@ -28,10 +28,12 @@ export function promptGenerator({
   currentUser,
   messageHistory = [],
   input,
+  context = "",
 }: {
   currentUser: User;
   messageHistory: Prompt[];
   input: string;
+  context?: string;
 }) {
   const prompt: Prompt[] = [];
   const systemPrompt = {
@@ -47,8 +49,22 @@ export function promptGenerator({
 
   prompt.push(systemPrompt);
   prompt.push(userInfo);
+  if (context) {
+    prompt.push({
+      role: "system",
+      content: `Use the following context when answering:\n\n${context}\n\nAnswer based on this context.`,
+    });
+  }
   prompt.push(...messageHistory);
   prompt.push({ role: "human", content: input });
 
   return prompt;
+}
+
+export async function getEmbeddings(
+  input: string,
+  model = "mxbai-embed-large"
+) {
+  const llmConnection = getEmbeddingsConnection(model);
+  return await llmConnection.embedQuery(input);
 }

@@ -13,7 +13,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@langchain/community": "^0.3.44",
+    "@langchain/core": "^0.3.57",
     "@langchain/ollama": "^0.2.0",
+    "@qdrant/js-client-rest": "^1.14.1",
+    "@types/multer": "^1.4.12",
+    "@types/pdf-parse": "^1.1.5",
     "apollo-server-express": "^3.13.0",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.0",
@@ -23,7 +28,13 @@
     "graphql": "^16.11.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0"
+    "langchain": "^0.3.27",
+    "llm-chunk": "^0.0.1",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.0",
+    "pdf-parse": "^1.1.1",
+    "pdf-parser": "^1.0.5",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@prisma/client": "^6.8.2",

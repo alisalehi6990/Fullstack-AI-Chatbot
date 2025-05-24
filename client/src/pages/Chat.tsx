@@ -1,9 +1,24 @@
 import { useMutation } from "@apollo/client";
 import React, { useEffect, useRef, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
 import { useUserStore } from "../store/userStore";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Message } from "./Home";
+import {
+  faClose,
+  faFilePdf,
+  faFileText,
+  faPaperclip,
+} from "@fortawesome/free-solid-svg-icons";
+import { uploadFile } from "../services/api";
+
+type AttachedFileType = {
+  name: string;
+  type: string;
+  sizeText: string;
+  size: number;
+};
 
 const Chat: React.FC = () => {
   const { user, clearUser } = useUserStore();
@@ -14,12 +29,14 @@ const Chat: React.FC = () => {
   const [streaming, setStreaming] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [aiTyping, setAiTyping] = useState<boolean>(false);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFileType[]>([]);
 
   const [chat] = useMutation(CHAT_MUTATION);
   const navigate = useNavigate();
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const loadingMessageRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const sessionIdInParam = searchParams.get("c");
@@ -147,6 +164,7 @@ const Chat: React.FC = () => {
       scrollToBottom();
     }
   };
+
   const scrollToBottom = () => {
     setTimeout(() => {
       if (chatContainerRef.current) {
@@ -154,6 +172,40 @@ const Chat: React.FC = () => {
           chatContainerRef.current.scrollHeight;
       }
     }, 0);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      let size = Math.round(file.size / 1000); // KB
+      let sizeText = `${size} KB`;
+      if (size >= 2000) {
+        console.log("File is bigger than 2MB, rejected!!!");
+        return;
+      }
+      if (size >= 1000) {
+        size = Math.round(size / 10) / 100;
+        sizeText = `${size} MB`;
+      }
+
+      try {
+        const response = await uploadFile(file);
+        setAttachedFiles((prev) => [
+          ...prev,
+          {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            sizeText,
+          },
+        ]);
+        e.target.value = "";
+        console.log("File chunks:", response.chunks);
+      } catch (error: any) {
+        console.error("Error uploading file:", error.message);
+        e.target.value = "";
+      }
+    }
   };
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -185,7 +237,75 @@ const Chat: React.FC = () => {
       </div>
 
       <div className="p-4 bg-white border-t">
-        <div className="flex space-x-2">
+        {attachedFiles && attachedFiles.length > 0 && (
+          <div className="flex mb-4 space-x-2 w-full">
+            {attachedFiles.map((file, index) => (
+              <button
+                key={index}
+                className="group relative h-[56px] pl-1.5 pr-1.5 w-[17rem] flex items-center bg-white dark:bg-[#1A1A1A] border border-[#E8EAF2] dark:border-[#424554] text-left border border-[#E8EAF1] dark:border-none rounded-xl"
+                type="button"
+              >
+                <div
+                  className={`flex size-[44px] items-center justify-center rounded-lg text-white ${
+                    file.type === "application/pdf"
+                      ? "bg-[#DE5A5E]"
+                      : "bg-[#61B6ED]"
+                  }`}
+                >
+                  <div className="flex size-[44px] items-center justify-center">
+                    {file.type === "application/pdf" ? (
+                      <FontAwesomeIcon
+                        icon={faFilePdf}
+                        className="h-8  w-full"
+                      />
+                    ) : (
+                      <FontAwesomeIcon
+                        icon={faFileText}
+                        className="h-8  w-full"
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="flex w-full flex-col justify-center -space-y-0.5 px-2">
+                  <div className="flex mb-1 text-sm font-medium dark:text-gray-100">
+                    <div className="line-clamp-1">
+                      {file.name.split(".")[0]}
+                    </div>
+                    <div className="break-keep">.{file.name.split(".")[1]}</div>
+                  </div>
+                  <div className="line-clamp-1 flex justify-between text-xs text-gray-500">
+                    <span className="capitalize !m-0">{file.sizeText}</span>
+                  </div>
+                </div>
+                <div
+                  className="absolute bg-white flex group-hover:visible items-center justify-center right-[6px] rounded-full size-[14px] top-[6px] invisible group-hover:visible"
+                  onClick={(e) =>
+                    setAttachedFiles((prev) =>
+                      prev.filter((file, i) => i !== index)
+                    )
+                  }
+                >
+                  <FontAwesomeIcon icon={faClose} />
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="flex items-center space-x-2">
+          <FontAwesomeIcon
+            icon={faPaperclip}
+            onClick={() => fileInputRef.current?.click()}
+            className="cursor-pointer fa-paperclip h-[20px] mx-0 svg-inline--fa w-[18px]"
+          />
+
+          <input
+            type="file"
+            id="file-upload"
+            className="hidden"
+            accept=".pdf, .txt"
+            ref={fileInputRef}
+            onChange={(e) => handleFileChange(e)}
+          />
           <input
             type="text"
             value={input}
@@ -202,7 +322,8 @@ const Chat: React.FC = () => {
             Send
           </button>
         </div>
-        <div className="flex w-full">
+
+        <div className="flex w-full mt-2">
           <input
             type="checkbox"
             checked={streaming}

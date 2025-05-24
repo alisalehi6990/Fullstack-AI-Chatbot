@@ -2,6 +2,7 @@ import { ApolloError } from "apollo-server-express";
 import { promptGenerator, queryOllama } from "../services/llm.service";
 import { InputJsonValue } from "@prisma/client/runtime/library";
 import { fetchUserSession, updateSession } from "../services/session.service";
+import { getContextFromQuery } from "../services/rag.service";
 
 export type Message = {
   isUser: boolean;
@@ -35,11 +36,14 @@ const chatResolvers = {
         const mappedChatHistory = Array.isArray(chatSession.messages)
           ? (chatSession.messages as Prompt[])
           : [];
+        const context = await getContextFromQuery(message, 3);
+        const contextString = context.join("\n\n");
 
         const prompt = promptGenerator({
           currentUser,
           messageHistory: mappedChatHistory,
           input: message,
+          context: contextString,
         });
         const reply = await queryOllama({ prompt });
 

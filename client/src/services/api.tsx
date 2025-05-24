@@ -88,3 +88,27 @@ export async function clerkSignIn(userData: {
     throw new Error(error?.response?.data?.message || "Login failed");
   }
 }
+
+export async function uploadFile(file: File): Promise<{ chunks: string[] }> {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response: AxiosResponse<{ chunks: string[] }> = await apiService.post(
+      "/chat/upload",
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Upload failed");
+  }
+}
