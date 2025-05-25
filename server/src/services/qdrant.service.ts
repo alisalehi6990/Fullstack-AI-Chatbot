@@ -1,7 +1,7 @@
 import { QdrantClient } from "@qdrant/js-client-rest";
 import "dotenv/config";
 
-async function getClient() {
+export async function getClient() {
   if (!process.env.QDRANT_URL || !process.env.QDRANT_API_KEY) {
     throw new Error(
       "Qdrant URL and API key must be set in environment variables."
@@ -34,7 +34,7 @@ async function getClient() {
   return qdrantClient;
 }
 
-async function addPointToQdrant(data: {
+export async function addPointToQdrant(data: {
   id: number | string;
   vector: number[];
   payload:
@@ -63,15 +63,29 @@ async function addPointToQdrant(data: {
         },
       ],
     })
-    .then((response) => {
-      console.log("Upserted data:", response);
-    })
     .catch((error) => {
       console.error("Error upserting data:", error.data.status.error);
     });
 }
 
-async function searchQdrant(queryVector: number[], limit = 5) {
+export async function removeDocumentFromQdrant(documentId: string) {
+  const client = await getClient();
+  const collection = process.env.QDRANT_COLLECTION;
+  if (!collection) {
+    throw new Error("Collection is not defined!!");
+  }
+  await client
+    .delete(collection, {
+      filter: {
+        must: [{ key: "documentId", match: { value: documentId } }],
+      },
+    })
+    .catch((error) => {
+      console.error("Error removing document:", error.data.status.error);
+    });
+}
+
+export async function searchQdrant(queryVector: number[], limit = 5) {
   const client = await getClient();
   const collection = process.env.QDRANT_COLLECTION;
   if (!collection) {
@@ -84,5 +98,3 @@ async function searchQdrant(queryVector: number[], limit = 5) {
 
   return result.map((r) => r.payload?.text).filter(Boolean);
 }
-
-export { getClient, addPointToQdrant, searchQdrant };

@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import { promptGenerator, queryOllama } from "../services/llm.service";
 import { ApolloError } from "apollo-server-express";
 import { fetchUserSession, updateSession } from "../services/session.service";
-import { v4 as uuidv4 } from "uuid";
 import multer from "multer";
 import pdfParse from "pdf-parse";
 import { chunkText } from "../utils/chunkText";
@@ -10,6 +9,8 @@ import {
   getContextFromQuery,
   processAndStoreChunks,
 } from "../services/rag.service";
+import { prisma } from "../app";
+import { removeDocumentFromQdrant } from "../services/qdrant.service";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -70,10 +71,10 @@ router.post("/stream", async (req: Request, res: Response) => {
 });
 
 router.post(
-  "/upload",
+  "/documents",
   upload.single("file"),
   async (
-    req: Request & { file?: Express.Multer.File },
+    req: Request & { file?: Express.Multer.File; sessionId?: string },
     res: Response
   ): Promise<void> => {
     try {
@@ -82,8 +83,15 @@ router.post(
         throw new ApolloError("Authentication required", "UNAUTHENTICATED");
       }
       const buffer = req.file?.buffer;
+      const sessionId = req.body.sessionId;
       if (!buffer) {
         res.status(400).json({ error: "No file uploaded" });
+        return;
+      }
+      if (!sessionId) {
+        res
+          .status(400)
+          .json({ error: "No Session defined for the uploaded document" });
         return;
       }
 
@@ -99,13 +107,45 @@ router.post(
 
       const chunks = await chunkText(text, 5);
 
-      const documentId = uuidv4();
-      res.json({ message: "Document processed and stored", documentId });
-      await processAndStoreChunks(documentId, chunks);
+      const document = await prisma.documents.create({
+        data: {
+          sessionId,
+          userId: currentUser.id,
+        },
+      });
+      res.json({
+        message: "Document processed and stored",
+        documentId: document.id,
+      });
+      await processAndStoreChunks(document.id, chunks);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   }
 );
+
+router.delete("/documents/:id", async (req: Request, res: Response) => {
+  try {
+    const currentUser = req.currentUser;
+    if (!currentUser) {
+      throw new ApolloError("Authentication required", "UNAUTHENTICATED");
+    }
+    const { id } = req.params;
+    await prisma.documents
+      .delete({
+        where: {
+          id,
+          userId: currentUser.id,
+        },
+      })
+      .catch((e) => {
+        console.log("Document FAILED to delete from Mongo", e.message);
+      });
+    await removeDocumentFromQdrant(id);
+    res.json({ message: "Document deleted" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 export default router;

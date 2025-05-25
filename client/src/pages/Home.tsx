@@ -10,18 +10,12 @@ import {
   faFileText,
   faPaperclip,
 } from "@fortawesome/free-solid-svg-icons";
-import { uploadFile } from "../services/api";
+import { uploadDocument } from "../services/api";
+import { AttachedFileType } from "../types/chat";
 
 export type Message = {
   isUser: boolean;
   content: string;
-};
-
-type AttachedFileType = {
-  name: string;
-  type: string;
-  sizeText: string;
-  size: number;
 };
 
 const HomePage: React.FC = () => {
@@ -96,7 +90,7 @@ const HomePage: React.FC = () => {
       }
 
       try {
-        const response = await uploadFile(file);
+        const response = await uploadDocument(file, "");
         setAttachedFiles((prev) => [
           ...prev,
           {
@@ -104,10 +98,11 @@ const HomePage: React.FC = () => {
             type: file.type,
             size: file.size,
             sizeText,
+            id: response.documentId,
           },
         ]);
         e.target.value = "";
-        console.log("File chunks:", response.chunks);
+        console.log("File documentId:", response.documentId);
       } catch (error: any) {
         console.error("Error uploading file:", error.message);
         e.target.value = "";

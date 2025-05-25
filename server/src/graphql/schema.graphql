@@ -21,7 +21,7 @@ type Query {
 }
 
 type Mutation {
-  chat(message: String!, sessionId: String): Message!
+  chat(message: String!, sessionId: String, documents: [String]): Message!
   approveUser(id: ID!): User!
   removeUser(id: ID!): User!
 }

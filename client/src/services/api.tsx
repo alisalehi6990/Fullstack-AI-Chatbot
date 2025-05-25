@@ -89,26 +89,45 @@ export async function clerkSignIn(userData: {
   }
 }
 
-export async function uploadFile(file: File): Promise<{ chunks: string[] }> {
+export async function uploadDocument(
+  file: File,
+  sessionId: string
+): Promise<{ documentId: string }> {
   try {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No token found");
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("sessionId", sessionId);
 
-    const response: AxiosResponse<{ chunks: string[] }> = await apiService.post(
-      "/chat/upload",
-      formData,
-      {
+    const response: AxiosResponse<{ documentId: string }> =
+      await apiService.post("/chat/documents", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
-      }
-    );
+      });
     return response.data;
   } catch (error: any) {
     throw new Error(error?.response?.data?.message || "Upload failed");
+  }
+}
+
+export async function removeDocument(documentId: string) {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+
+    const response = await apiService.delete("/chat/documents/" + documentId, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error?.response?.data?.message || "Document removal failed"
+    );
   }
 }

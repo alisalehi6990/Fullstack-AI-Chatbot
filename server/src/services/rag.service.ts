@@ -1,4 +1,4 @@
-import { addPointToQdrant, getClient, searchQdrant } from "./qdrant.service";
+import { addPointToQdrant, searchQdrant } from "./qdrant.service";
 import { getEmbeddings } from "./llm.service";
 import { v4 as uuidv4 } from "uuid";
 

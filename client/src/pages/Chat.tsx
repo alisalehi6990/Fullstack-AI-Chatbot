@@ -11,14 +11,8 @@ import {
   faFileText,
   faPaperclip,
 } from "@fortawesome/free-solid-svg-icons";
-import { uploadFile } from "../services/api";
-
-type AttachedFileType = {
-  name: string;
-  type: string;
-  sizeText: string;
-  size: number;
-};
+import { removeDocument, uploadDocument } from "../services/api";
+import { AttachedFileType } from "../types/chat";
 
 const Chat: React.FC = () => {
   const { user, clearUser } = useUserStore();
@@ -82,6 +76,7 @@ const Chat: React.FC = () => {
           body: JSON.stringify({
             message: input,
             sessionId,
+            documents: attachedFiles.map((file) => file.id),
           }),
         });
 
@@ -130,6 +125,7 @@ const Chat: React.FC = () => {
           variables: {
             message: input,
             sessionId,
+            documents: attachedFiles.map((file) => file.id),
           },
         });
 
@@ -145,7 +141,7 @@ const Chat: React.FC = () => {
         }
       }
       scrollToBottom();
-
+      setAttachedFiles([]);
       setLoading(false);
       if (loadingMessageRef.current) {
         (loadingMessageRef.current as HTMLDivElement).style.display = "none";
@@ -189,24 +185,32 @@ const Chat: React.FC = () => {
       }
 
       try {
-        const response = await uploadFile(file);
+        const response = await uploadDocument(file, sessionId);
         setAttachedFiles((prev) => [
           ...prev,
           {
+            sizeText,
+            id: response.documentId,
             name: file.name,
             type: file.type,
             size: file.size,
-            sizeText,
           },
         ]);
         e.target.value = "";
-        console.log("File chunks:", response.chunks);
+        console.log("File documentId:", response.documentId);
       } catch (error: any) {
         console.error("Error uploading file:", error.message);
         e.target.value = "";
       }
     }
   };
+
+  const handleRemoveAttachement = async (index: number) => {
+    const document = attachedFiles[index];
+    await removeDocument(document.id);
+    setAttachedFiles((prev) => prev.filter((file, i) => i !== index));
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       <div
@@ -279,11 +283,7 @@ const Chat: React.FC = () => {
                 </div>
                 <div
                   className="absolute bg-white flex group-hover:visible items-center justify-center right-[6px] rounded-full size-[14px] top-[6px] invisible group-hover:visible"
-                  onClick={(e) =>
-                    setAttachedFiles((prev) =>
-                      prev.filter((file, i) => i !== index)
-                    )
-                  }
+                  onClick={() => handleRemoveAttachement(index)}
                 >
                   <FontAwesomeIcon icon={faClose} />
                 </div>

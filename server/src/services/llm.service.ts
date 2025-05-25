@@ -1,4 +1,5 @@
-import { getQueryConnection, getEmbeddingsConnection } from "./ollama.service";
+import { Ollama, OllamaEmbeddings } from "@langchain/ollama";
+import { getOllamaConnection } from "./ollama.service";
 
 type Prompt = {
   role: string;
@@ -13,10 +14,10 @@ interface QueryOllamaProps {
 
 export async function queryOllama({
   prompt,
-  model = "llama3",
+  model,
   streaming = false,
 }: QueryOllamaProps) {
-  const llmConnection = getQueryConnection(model);
+  const llmConnection = getOllamaConnection({ model }) as Ollama;
 
   if (streaming) {
     return await llmConnection.stream(prompt);
@@ -61,10 +62,10 @@ export function promptGenerator({
   return prompt;
 }
 
-export async function getEmbeddings(
-  input: string,
-  model = "mxbai-embed-large"
-) {
-  const llmConnection = getEmbeddingsConnection(model);
+export async function getEmbeddings(input: string, model?: string) {
+  const llmConnection = getOllamaConnection({
+    model,
+    isEmbeding: true,
+  }) as OllamaEmbeddings;
   return await llmConnection.embedQuery(input);
 }
