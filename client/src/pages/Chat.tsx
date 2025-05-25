@@ -31,7 +31,7 @@ const Chat: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const loadingMessageRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  console.log(messages);
   useEffect(() => {
     const sessionIdInParam = searchParams.get("c");
     if (sessionIdInParam && sessionId !== sessionIdInParam) {
@@ -76,7 +76,12 @@ const Chat: React.FC = () => {
           body: JSON.stringify({
             message: input,
             sessionId,
-            documents: attachedFiles.map((file) => file.id),
+            messageDocuments: attachedFiles.map((file) => ({
+              id: file.id,
+              name: file.name,
+              type: file.type,
+              sizeText: file.sizeText,
+            })),
           }),
         });
 
@@ -121,11 +126,17 @@ const Chat: React.FC = () => {
           (loadingMessageRef.current as HTMLDivElement).style.display = "block";
         }
         scrollToBottom();
+        console.log(attachedFiles.map((file) => file.id));
         const res = await chat({
           variables: {
             message: input,
             sessionId,
-            documents: attachedFiles.map((file) => file.id),
+            messageDocuments: attachedFiles.map((file) => ({
+              id: file.id,
+              name: file.name,
+              type: file.type,
+              sizeText: file.sizeText,
+            })),
           },
         });
 
@@ -185,7 +196,11 @@ const Chat: React.FC = () => {
       }
 
       try {
-        const response = await uploadDocument(file, sessionId);
+        const response = await uploadDocument(file, sessionId, {
+          sizeText,
+          name: file.name,
+          type: file.type,
+        });
         setAttachedFiles((prev) => [
           ...prev,
           {

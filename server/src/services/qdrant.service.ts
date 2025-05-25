@@ -85,16 +85,29 @@ export async function removeDocumentFromQdrant(documentId: string) {
     });
 }
 
-export async function searchQdrant(queryVector: number[], limit = 5) {
+export async function searchQdrant(
+  queryVector: number[],
+  documentIds: string[],
+  limit = 5
+) {
   const client = await getClient();
   const collection = process.env.QDRANT_COLLECTION;
   if (!collection) {
     throw new Error("Collection is not defined!!");
   }
-  const result = await client.search(collection, {
+  let options: { vector: number[]; limit: number; filter?: any } = {
     vector: queryVector,
     limit,
-  });
+  };
+  if (documentIds && documentIds.length > 0) {
+    options.filter = {
+      should: documentIds.map((docId) => ({
+        key: "documentId",
+        match: { value: docId },
+      })),
+    };
+  }
 
+  const result = await client.search(collection, options);
   return result.map((r) => r.payload?.text).filter(Boolean);
 }

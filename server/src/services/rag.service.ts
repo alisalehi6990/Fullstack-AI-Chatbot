@@ -28,10 +28,14 @@ export async function processAndStoreChunks(
   }
 }
 
-export async function getContextFromQuery(query: string, limit = 5) {
+export async function getContextFromQuery(
+  query: string,
+  documentIds: string[] = [],
+  limit = 5
+) {
   try {
     const queryVector = await getEmbeddings(query);
-    return await searchQdrant(queryVector, limit);
+    return await searchQdrant(queryVector, documentIds, limit);
   } catch (e: any) {
     throw new Error(`Error in getContextFromQuery: ${e.message}`);
   }

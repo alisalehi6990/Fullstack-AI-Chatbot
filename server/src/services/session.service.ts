@@ -24,6 +24,7 @@ export const fetchUserSession = async ({
         where: {
           id: sessionId,
         },
+        include: { documents: true },
       });
       if (existingSession) {
         chatSession = existingSession;
@@ -34,9 +35,14 @@ export const fetchUserSession = async ({
         data: {
           userId,
           messages: [],
+          documents: {
+            create: [],
+          },
         },
+        include: { documents: true },
       });
     }
+
     return chatSession;
   } catch (error: any) {
     throw new ApolloError(error.message);

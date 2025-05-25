@@ -1,11 +1,12 @@
 type Message {
   aiResponse: String!
   sessionId: String!
-  messages: [ChatHistoryOutput!]!
 }
-type ChatHistoryOutput {
-  isUser: Boolean!
-  content: String!
+input MessageDocument {
+  id: String!,
+  name: String!,
+  type: String!,
+  sizeText: String!,
 }
 type User {
   id: ID!
@@ -21,7 +22,7 @@ type Query {
 }
 
 type Mutation {
-  chat(message: String!, sessionId: String, documents: [String]): Message!
+  chat(message: String!, sessionId: String, messageDocuments: [MessageDocument]): Message!
   approveUser(id: ID!): User!
   removeUser(id: ID!): User!
 }

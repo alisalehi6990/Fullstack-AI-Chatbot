@@ -9,6 +9,13 @@ export type Message = {
   content: string;
 };
 
+export type MessageDocument = {
+  id: string;
+  name: string;
+  type: string;
+  sizeText: string;
+};
+
 const chatResolvers = {
   Mutation: {
     chat: async (
@@ -16,9 +23,11 @@ const chatResolvers = {
       {
         sessionId,
         message,
+        messageDocuments,
       }: {
         sessionId?: string;
         message: string;
+        messageDocuments?: MessageDocument[];
       },
       context: any
     ) => {
@@ -36,20 +45,19 @@ const chatResolvers = {
         const mappedChatHistory = Array.isArray(chatSession.messages)
           ? (chatSession.messages as Prompt[])
           : [];
-        const context = await getContextFromQuery(message, 3);
-        const contextString = context.join("\n\n");
 
-        const prompt = promptGenerator({
+        const prompt = await promptGenerator({
+          messageHistory: chatSession.messages as any,
           currentUser,
-          messageHistory: mappedChatHistory,
           input: message,
-          context: contextString,
+          documents: chatSession.documents,
         });
+        console.log(prompt)
         const reply = await queryOllama({ prompt });
 
         const updatedMessages = [
           ...mappedChatHistory,
-          { role: "human", content: message },
+          { role: "human", content: message, documents: messageDocuments },
           { role: "ai", content: reply },
         ];
         await updateSession(chatSession.id, updatedMessages as InputJsonValue);

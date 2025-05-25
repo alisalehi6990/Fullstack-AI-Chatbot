@@ -91,7 +91,12 @@ export async function clerkSignIn(userData: {
 
 export async function uploadDocument(
   file: File,
-  sessionId: string
+  sessionId: string,
+  fileInfo: {
+    sizeText: string;
+    name: string;
+    type: string;
+  }
 ): Promise<{ documentId: string }> {
   try {
     const token = localStorage.getItem("token");
@@ -99,6 +104,7 @@ export async function uploadDocument(
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("fileInfo", JSON.stringify(fileInfo));
     formData.append("sessionId", sessionId);
 
     const response: AxiosResponse<{ documentId: string }> =

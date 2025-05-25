@@ -1,5 +1,7 @@
 import { Ollama, OllamaEmbeddings } from "@langchain/ollama";
 import { getOllamaConnection } from "./ollama.service";
+import { getContextFromQuery } from "./rag.service";
+import { MessageDocument } from "../graphql/chat.resolver";
 
 type Prompt = {
   role: string;
@@ -25,18 +27,35 @@ export async function queryOllama({
   return await llmConnection.invoke(prompt);
 }
 
-export function promptGenerator({
+export async function promptGenerator({
+  documents = [],
   currentUser,
-  messageHistory = [],
   input,
-  context = "",
+  messageHistory = [],
 }: {
-  currentUser: User;
-  messageHistory: Prompt[];
-  input: string;
-  context?: string;
+  currentUser: any;
+  messageHistory: any[];
+  documents: MessageDocument[];
+  input: any;
 }) {
   const prompt: Prompt[] = [];
+
+  const mappedChatHistory = Array.isArray(messageHistory)
+    ? (messageHistory as Prompt[])
+    : [];
+  const promptGeneratorInput = {
+    currentUser,
+    messageHistory: mappedChatHistory,
+    input,
+    context: "",
+  };
+  const documentsIds = documents.map((doc) => doc.id);
+  if (documents && documents.length > 0) {
+    const context = await getContextFromQuery(input, documentsIds, 3);
+    const contextString = context.join("\n\n");
+    promptGeneratorInput.context = contextString;
+  }
+
   const systemPrompt = {
     role: "system",
     content: "You are a helpful customer support",
@@ -50,10 +69,10 @@ export function promptGenerator({
 
   prompt.push(systemPrompt);
   prompt.push(userInfo);
-  if (context) {
+  if (promptGeneratorInput.context) {
     prompt.push({
       role: "system",
-      content: `Use the following context when answering:\n\n${context}\n\nAnswer based on this context.`,
+      content: `Use the following context when answering:\n\n${promptGeneratorInput.context}\n\n`,
     });
   }
   prompt.push(...messageHistory);

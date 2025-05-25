@@ -11,6 +11,7 @@ import {
 } from "../services/rag.service";
 import { prisma } from "../app";
 import { removeDocumentFromQdrant } from "../services/qdrant.service";
+import { MessageDocument } from "../graphql/chat.resolver";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -18,10 +19,11 @@ const router = express.Router();
 type Prompt = {
   role: string;
   content: string;
+  documents?: MessageDocument[];
 };
 
 router.post("/stream", async (req: Request, res: Response) => {
-  const { message, sessionId } = req.body;
+  const { message, sessionId, messageDocuments } = req.body;
   const currentUser = req.currentUser;
   if (!currentUser) {
     throw new ApolloError("Authentication required", "UNAUTHENTICATED");
@@ -32,18 +34,13 @@ router.post("/stream", async (req: Request, res: Response) => {
       sessionId,
     });
 
-    const mappedChatHistory = Array.isArray(chatSession.messages)
-      ? (chatSession.messages as Prompt[])
-      : [];
-    const context = await getContextFromQuery(message, 3);
-    const contextString = context.join("\n\n");
-
-    const prompt = promptGenerator({
+    const prompt = await promptGenerator({
+      messageHistory: chatSession.messages as any,
       currentUser,
-      messageHistory: mappedChatHistory,
       input: message,
-      context: contextString,
+      documents: chatSession.documents,
     });
+
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
@@ -51,17 +48,22 @@ router.post("/stream", async (req: Request, res: Response) => {
     });
 
     const stream = await queryOllama({ prompt, streaming: true });
+
     let reply = "";
     for await (const chunk of stream) {
       reply += chunk;
       res.write(`data: ${JSON.stringify({ content: chunk })}\n\n\n`);
       res.flush();
     }
+
     res.end();
 
+    const mappedChatHistory = Array.isArray(chatSession.messages)
+      ? (chatSession.messages as Prompt[])
+      : [];
     const updatedMessages = [
       ...mappedChatHistory,
-      { role: "human", content: message },
+      { role: "human", content: message, documents: messageDocuments },
       { role: "ai", content: reply },
     ];
     await updateSession(chatSession.id, updatedMessages);
@@ -69,12 +71,20 @@ router.post("/stream", async (req: Request, res: Response) => {
     throw new ApolloError(error.message);
   }
 });
-
+type FileInfo = {
+  sizeText: string;
+  name: string;
+  type: string;
+};
 router.post(
   "/documents",
   upload.single("file"),
   async (
-    req: Request & { file?: Express.Multer.File; sessionId?: string },
+    req: Request & {
+      file?: Express.Multer.File;
+      sessionId?: string;
+      fileInfo?: FileInfo;
+    },
     res: Response
   ): Promise<void> => {
     try {
@@ -84,6 +94,7 @@ router.post(
       }
       const buffer = req.file?.buffer;
       const sessionId = req.body.sessionId;
+      const fileInfo = JSON.parse(req.body.fileInfo);
       if (!buffer) {
         res.status(400).json({ error: "No file uploaded" });
         return;
@@ -111,6 +122,9 @@ router.post(
         data: {
           sessionId,
           userId: currentUser.id,
+          name: fileInfo.name,
+          type: fileInfo.type,
+          sizeText: fileInfo.sizeText,
         },
       });
       res.json({

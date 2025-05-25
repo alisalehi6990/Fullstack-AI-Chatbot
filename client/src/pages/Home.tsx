@@ -90,7 +90,11 @@ const HomePage: React.FC = () => {
       }
 
       try {
-        const response = await uploadDocument(file, "");
+        const response = await uploadDocument(file, "", {
+          sizeText,
+          name: file.name,
+          type: file.type,
+        });
         setAttachedFiles((prev) => [
           ...prev,
           {

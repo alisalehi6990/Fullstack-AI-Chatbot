@@ -115,6 +115,7 @@ export const verifyToken = async (req: Request, res: Response) => {
       (chat) =>
         (chat.messages = (chat.messages as any[]).map((message) => ({
           content: message.content,
+          documents: message.documents,
           isUser: message.role === "human",
         })))
     );
