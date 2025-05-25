@@ -49,6 +49,12 @@ const HomePage: React.FC = () => {
       const res = await chat({
         variables: {
           message: input,
+          messageDocuments: attachedFiles.map((file) => ({
+            id: file.id,
+            name: file.name,
+            type: file.type,
+            sizeText: file.sizeText,
+          })),
         },
       });
 
@@ -90,10 +96,13 @@ const HomePage: React.FC = () => {
       }
 
       try {
-        const response = await uploadDocument(file, "", {
-          sizeText,
-          name: file.name,
-          type: file.type,
+        const response = await uploadDocument({
+          file,
+          fileInfo: {
+            sizeText,
+            name: file.name,
+            type: file.type,
+          },
         });
         setAttachedFiles((prev) => [
           ...prev,

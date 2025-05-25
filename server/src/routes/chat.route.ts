@@ -32,15 +32,15 @@ router.post("/stream", async (req: Request, res: Response) => {
     const chatSession = await fetchUserSession({
       userId: currentUser.id,
       sessionId,
+      messageDocuments,
     });
 
     const prompt = await promptGenerator({
       messageHistory: chatSession.messages as any,
       currentUser,
       input: message,
-      documents: chatSession.documents,
+      documents: chatSession.documents || [],
     });
-
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
@@ -99,12 +99,6 @@ router.post(
         res.status(400).json({ error: "No file uploaded" });
         return;
       }
-      if (!sessionId) {
-        res
-          .status(400)
-          .json({ error: "No Session defined for the uploaded document" });
-        return;
-      }
 
       let text;
       if (req.file?.mimetype === "application/pdf") {
@@ -116,7 +110,7 @@ router.post(
         return;
       }
 
-      const chunks = await chunkText(text, 5);
+      const chunks = await chunkText(text, 100);
 
       const document = await prisma.documents.create({
         data: {

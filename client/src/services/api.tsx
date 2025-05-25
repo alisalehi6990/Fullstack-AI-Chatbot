@@ -89,15 +89,19 @@ export async function clerkSignIn(userData: {
   }
 }
 
-export async function uploadDocument(
-  file: File,
-  sessionId: string,
+export async function uploadDocument({
+  file,
+  sessionId,
+  fileInfo,
+}: {
+  file: File;
+  sessionId?: string;
   fileInfo: {
-    sizeText: string;
     name: string;
     type: string;
-  }
-): Promise<{ documentId: string }> {
+    sizeText: string;
+  };
+}): Promise<{ documentId: string }> {
   try {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No token found");
@@ -105,7 +109,9 @@ export async function uploadDocument(
     const formData = new FormData();
     formData.append("file", file);
     formData.append("fileInfo", JSON.stringify(fileInfo));
-    formData.append("sessionId", sessionId);
+    if (sessionId) {
+      formData.append("sessionId", sessionId);
+    }
 
     const response: AxiosResponse<{ documentId: string }> =
       await apiService.post("/chat/documents", formData, {

@@ -40,6 +40,7 @@ const chatResolvers = {
         const chatSession = await fetchUserSession({
           userId: currentUser.id,
           sessionId,
+          messageDocuments,
         });
 
         const mappedChatHistory = Array.isArray(chatSession.messages)
@@ -50,9 +51,9 @@ const chatResolvers = {
           messageHistory: chatSession.messages as any,
           currentUser,
           input: message,
-          documents: chatSession.documents,
+          documents: chatSession.documents || [],
         });
-        console.log(prompt)
+
         const reply = await queryOllama({ prompt });
 
         const updatedMessages = [
