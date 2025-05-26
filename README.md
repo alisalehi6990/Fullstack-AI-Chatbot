@@ -70,6 +70,7 @@ The project is divided into two main components:
 Create a `.env` file in the server directory:
 ```
 DATABASE_URL="postgresql://user:password@localhost:5432/chatbot"
+DATABASE_URL="mongodb://user:password@localhost:27017/chatbot"
 JWT_SECRET="your-secret-key"
 PORT=4000
 ```

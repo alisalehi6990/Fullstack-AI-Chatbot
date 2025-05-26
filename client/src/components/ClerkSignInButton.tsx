@@ -8,7 +8,7 @@ const ClerkSignInButton: React.FC = () => {
       fallbackRedirectUrl={"http://localhost:3000/clerk-callback"}
       oauthFlow={"popup"}
     >
-      <button className="flex justify-center items-center w-full bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">
+      <button className="rounded-md flex justify-center items-center text-white w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 py-3">
         Login with
         <svg
           fill="none"

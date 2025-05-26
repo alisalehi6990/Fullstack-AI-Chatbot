@@ -42,30 +42,61 @@ export const loginUser = async (req: Request, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { email },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        role: true,
+        password: true,
+        isActive: true,
+        chatHistories: {
+          select: {
+            id: true,
+            messages: true,
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 5,
+        },
+      },
     });
 
     if (!user || !user.password) {
       res.status(400).json({ message: "Invalid credentials" });
-      return;
-    }
-
-    if (!user.isActive) {
+    } else if (!user.isActive) {
       res.status(403).json({ message: "Account is not active" });
-      return;
+    } else {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        res.status(400).json({ message: "Invalid credentials" });
+      } else {
+        // Generate JWT token
+        const token = jwt.sign({ id: user.id }, JWT_SECRET, {
+          expiresIn: "1d",
+        });
+
+        user.chatHistories.forEach((chat) => {
+          chat.messages = (chat.messages as any[]).map((message) => ({
+            content: message.content,
+            documents: message.documents,
+            isUser: message.role === "human",
+          }));
+        });
+        res.status(200).json({
+          user: {
+            displayName: user.displayName,
+            role: user.role,
+            isActive: user.isActive,
+            chatHistories: user.chatHistories,
+          },
+          token,
+          message: "Login successful",
+        });
+      }
     }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      res.status(400).json({ message: "Invalid credentials" });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign({ id: user.id }, JWT_SECRET, {
-      expiresIn: "1d",
-    });
-
-    res.status(200).json({ token, message: "Login successful" });
   } catch (error) {
     console.error("Error logging in user:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -93,6 +124,7 @@ export const verifyToken = async (req: Request, res: Response) => {
           select: {
             id: true,
             messages: true,
+            createdAt: true,
           },
           orderBy: {
             createdAt: "desc",
@@ -132,10 +164,29 @@ export const clerkSignIn = async (req: Request, res: Response) => {
   try {
     let user = await prisma.user.findUnique({
       where: { email },
+      select: {
+        id: true,
+        clerkId: true,
+        email: true,
+        displayName: true,
+        role: true,
+        isActive: true,
+        chatHistories: {
+          select: {
+            id: true,
+            messages: true,
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 5,
+        },
+      },
     });
 
     if (!user) {
-      user = await prisma.user.create({
+      const createdUser = await prisma.user.create({
         data: {
           clerkId,
           email,
@@ -144,6 +195,7 @@ export const clerkSignIn = async (req: Request, res: Response) => {
           isActive: true,
         },
       });
+      user = { ...createdUser, chatHistories: [] };
     } else if (!user.clerkId) {
       await prisma.user.update({
         where: { email },
@@ -151,15 +203,20 @@ export const clerkSignIn = async (req: Request, res: Response) => {
       });
       user.isActive = true;
     }
-    if (!user.isActive) {
-      res.status(403).json({ message: "Account is not active" });
-      return;
-    }
     const token = jwt.sign({ id: user.id }, JWT_SECRET, {
       expiresIn: "1d",
     });
 
-    res.status(200).json({ token, message: "Login successful" });
+    res.status(200).json({
+      token,
+      user: {
+        email,
+        displayName: user.displayName,
+        isActive: user.isActive,
+        role: user.role,
+      },
+      message: "Login successful",
+    });
   } catch (error) {
     console.error("Error signing in with Clerk:", error);
     res.status(500).json({ message: "Internal server error" });

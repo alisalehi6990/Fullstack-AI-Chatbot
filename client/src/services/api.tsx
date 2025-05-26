@@ -8,7 +8,7 @@ export const apiService = axios.create({
 
 export interface AuthResponse {
   token: string;
-  user?: User;
+  user: User;
   message: string;
 }
 
@@ -21,6 +21,7 @@ export interface User {
   chatHistories?: {
     id: string;
     messages: Message[];
+    createdAt: string;
   }[];
 }
 
@@ -49,8 +50,8 @@ export async function registerUser(
       userData
     );
     return response.data;
-  } catch (error) {
-    throw new Error("Registration failed");
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Registration failed");
   }
 }
 

@@ -1,0 +1,189 @@
+import React, { useState } from 'react';
+import { Upload, X, File, CheckCircle } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Card } from '../ui/card';
+import { Progress } from '../ui/progress';
+
+interface DocumentUploadProps {
+  onClose: () => void;
+}
+
+export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onClose }) => {
+  const [dragOver, setDragOver] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    const validFiles = droppedFiles.filter(file => 
+      file.type === 'application/pdf' || file.type === 'text/plain'
+    );
+    
+    setFiles(prev => [...prev, ...validFiles]);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+      setFiles(prev => [...prev, ...selectedFiles]);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleUpload = async () => {
+    if (files.length === 0) return;
+    
+    setUploading(true);
+    setUploadProgress(0);
+
+    // Simulate upload progress
+    for (let i = 0; i <= 100; i += 10) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setUploadProgress(i);
+    }
+
+    // Simulate processing
+    setTimeout(() => {
+      setUploading(false);
+      setFiles([]);
+      onClose();
+    }, 1000);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  return (
+    <Card className="w-full max-w-2xl mx-auto p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Upload Documents</h3>
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Drop Zone */}
+      <div
+        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          dragOver 
+            ? 'border-blue-500 bg-blue-50' 
+            : 'border-gray-300 hover:border-gray-400'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-lg font-medium text-gray-900 mb-2">
+          Drop your documents here
+        </p>
+        <p className="text-sm text-gray-500 mb-4">
+          or click to browse files
+        </p>
+        <input
+          type="file"
+          multiple
+          accept=".pdf,.txt"
+          onChange={handleFileSelect}
+          className="hidden"
+          id="file-upload"
+        />
+        <label htmlFor="file-upload">
+          <Button variant="outline" className="cursor-pointer">
+            Choose Files
+          </Button>
+        </label>
+        <p className="text-xs text-gray-400 mt-2">
+          Supported formats: PDF, TXT (Max 10MB each)
+        </p>
+      </div>
+
+      {/* File List */}
+      {files.length > 0 && (
+        <div className="mt-6">
+          <h4 className="text-sm font-medium text-gray-900 mb-3">
+            Selected Files ({files.length})
+          </h4>
+          <div className="space-y-2">
+            {files.map((file, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <File className="h-5 w-5 text-gray-500" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                    <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => removeFile(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Upload Progress */}
+      {uploading && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-900">Uploading...</span>
+            <span className="text-sm text-gray-500">{uploadProgress}%</span>
+          </div>
+          <Progress value={uploadProgress} className="w-full" />
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex justify-end space-x-3 mt-6">
+        <Button variant="outline" onClick={onClose} disabled={uploading}>
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleUpload} 
+          disabled={files.length === 0 || uploading}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+        >
+          {uploading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Upload {files.length} File{files.length !== 1 ? 's' : ''}
+            </>
+          )}
+        </Button>
+      </div>
+    </Card>
+  );
+};

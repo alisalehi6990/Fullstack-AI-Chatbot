@@ -1,6 +1,5 @@
 import React from "react";
 import { gql, useQuery, useMutation } from "@apollo/client";
-import { useUserStore } from "../store/userStore";
 
 const GET_PENDING_USERS = gql`
   query PendingUsers {
@@ -24,14 +23,9 @@ const APPROVE_USER = gql`
 `;
 
 const AdminPanel: React.FC = () => {
-  const { user, clearUser } = useUserStore();
   const [approveUser] = useMutation(APPROVE_USER);
   const { loading, error, data, refetch } = useQuery(GET_PENDING_USERS);
-  if (!user) {
-    clearUser();
-    window.location.href = "/signin";
-    return null;
-  }
+
   const handleApprove = async (id: string) => {
     await approveUser({ variables: { id } });
     refetch();

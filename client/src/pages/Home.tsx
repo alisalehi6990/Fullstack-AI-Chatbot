@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
 import { useUserStore } from "../store/userStore";
 import { useNavigate } from "react-router-dom";
@@ -13,13 +13,22 @@ import {
 import { uploadDocument } from "../services/api";
 import { AttachedFileType } from "../types/chat";
 
+export type MessageDocument = {
+  id: string;
+  name: string;
+  type: string;
+  sizeText: string;
+};
+
 export type Message = {
   isUser: boolean;
   content: string;
+  documents?: MessageDocument[];
+  timestamp?: Date;
 };
 
 const HomePage: React.FC = () => {
-  const { user, clearUser, addUserChatHistory } = useUserStore();
+  const { addUserChatHistory } = useUserStore();
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
   const [chat] = useMutation(CHAT_MUTATION);
@@ -28,13 +37,6 @@ const HomePage: React.FC = () => {
 
   const loadingMessageRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!user) {
-      clearUser();
-      window.location.href = "/signin";
-    }
-  }, [user, clearUser]);
 
   const handleSend = async () => {
     if (!input.trim()) return;

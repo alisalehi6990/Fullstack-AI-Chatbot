@@ -1,53 +1,69 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useUser, useAuth } from "@clerk/clerk-react";
-import { useUserStore } from "../store/userStore";
 import { clerkSignIn } from "../services/api";
+import { useAuthStore } from "../store/authStore";
+import { useToast } from "../hooks/use-toast";
+import { useChatStore } from "../store/chatStore";
 
 const ClerkCallbackPage: React.FC = () => {
   const navigate = useNavigate();
   const { isSignedIn, signOut, isLoaded } = useAuth();
-  const { user } = useUser();
-  const setUser = useUserStore((state) => state.setUser);
-  const clearUser = useUserStore((state) => state.clearUser);
+  const { user: clerkUser } = useUser();
+  const { logout, login, isAuthenticated } = useAuthStore();
+  const { toast } = useToast();
+  const { setChatHistory } = useChatStore();
 
   useEffect(() => {
     const syncWithBackend = async () => {
-      if (!isSignedIn || !user || !user.primaryEmailAddress || !isLoaded)
+      if (
+        !isSignedIn ||
+        !clerkUser ||
+        !clerkUser.primaryEmailAddress ||
+        !isLoaded
+      )
         return;
 
       try {
-        const response = await clerkSignIn({
-          clerkId: user.id,
-          email: user.primaryEmailAddress.emailAddress,
-          displayName: user.fullName,
+        const { token, user } = await clerkSignIn({
+          clerkId: clerkUser.id,
+          email: clerkUser.primaryEmailAddress.emailAddress,
+          displayName: clerkUser.fullName,
         });
 
-        const { token } = response;
-
         localStorage.setItem("token", token);
-
-        setUser(
-          {
-            id: user.id,
-            email: user.primaryEmailAddress.emailAddress,
-            displayName: user.fullName || undefined,
-            role: "USER",
-            isActive: true,
-          },
-          token
-        );
-
+        login(user, token);
+        if (user.chatHistories) {
+          setChatHistory(user.chatHistories);
+        }
         navigate("/");
       } catch (error: any) {
-        await signOut({ redirectUrl: "/signin" });
-        clearUser();
-        navigate("/signin", { state: { errorMessage: error.message } });
+        await signOut();
+        logout();
+        toast({
+          title: "Something went wrong",
+          description: error.message,
+        });
+        navigate("/");
       }
     };
 
     syncWithBackend();
-  }, [isSignedIn, user, navigate, setUser, clearUser, signOut, isLoaded]);
+  }, [
+    setChatHistory,
+    isSignedIn,
+    clerkUser,
+    navigate,
+    signOut,
+    isLoaded,
+    login,
+    logout,
+    toast,
+  ]);
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="flex justify-center items-center h-screen">
