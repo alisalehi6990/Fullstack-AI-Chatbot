@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useUserStore } from "../store/userStore";
+import { useUserStore } from "@/store/userStore";
 import { SignOutButton } from "@clerk/clerk-react";
 
 const Sidebar: React.FC = () => {

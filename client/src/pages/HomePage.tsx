@@ -1,15 +1,15 @@
 import { useMutation } from "@apollo/client";
 import React, { useState } from "react";
-import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
+import { CHAT_MUTATION } from "@/graphql/mutations/chatMutation";
 import { useNavigate } from "react-router-dom";
-import { uploadDocument } from "../services/api";
-import { AttachedFileType } from "../types/chat";
-import { Button, Input } from "../components/ui";
+import { uploadDocument } from "@/services/api";
+import { AttachedFileType } from "@/types/chat";
+import { Button, Input } from "@/components/ui";
 import { Bot, Menu, Paperclip, Send } from "lucide-react";
-import { DocumentUpload } from "../components/chat/DocumentUpload";
-import { useLayoutStore } from "../store/layoutStore";
-import { useChatStore } from "../store/chatStore";
-import { MessageList } from "../components/chat/MessageList";
+import { DocumentUpload } from "@/components/chat/DocumentUpload";
+import { useLayoutStore } from "@/store/layoutStore";
+import { useChatStore } from "@/store/chatStore";
+import { MessageList } from "@/components/chat/MessageList";
 
 export type MessageDocument = {
   id: string;

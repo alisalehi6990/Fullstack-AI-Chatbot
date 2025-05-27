@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useUserStore } from "../store/userStore"; // TODO: Delete
-import { verifyToken } from "../services/api";
-import { useAuthStore } from "../store/authStore";
-import { AuthModal } from "./layout/AuthModal";
-import { useToast } from "../hooks/use-toast";
-import { useChatStore } from "../store/chatStore";
+import { useUserStore } from "@/store/userStore"; // TODO: Delete
+import { verifyToken } from "@/services/api";
+import { useAuthStore } from "@/store/authStore";
+import { AuthModal } from "@/components/layout/AuthModal";
+import { useToast } from "@/hooks/use-toast";
+import { useChatStore } from "@/store/chatStore";
 
 interface ProtectedRouteProps {
   requiredRole?: string;

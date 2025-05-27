@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { useUserStore } from "../store/userStore";
-import { verifyToken } from "../services/api";
+import { useUserStore } from "@/store/userStore";
+import { verifyToken } from "@/services/api";
 
 interface AuthRedirectProps {
   children: React.ReactNode;

@@ -1,8 +1,8 @@
 import { useMutation } from "@apollo/client";
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
-import { useUserStore } from "../store/userStore";
+import { CHAT_MUTATION } from "@/graphql/mutations/chatMutation";
+import { useUserStore } from "@/store/userStore";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   faClose,
@@ -10,8 +10,8 @@ import {
   faFileText,
   faPaperclip,
 } from "@fortawesome/free-solid-svg-icons";
-import { removeDocument, uploadDocument } from "../services/api";
-import { AttachedFileType, Message } from "../types/chat";
+import { removeDocument, uploadDocument } from "@/services/api";
+import { AttachedFileType, Message } from "@/types/chat";
 
 const Chat: React.FC = () => {
   const { user, clearUser } = useUserStore();

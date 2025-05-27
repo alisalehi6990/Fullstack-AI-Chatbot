@@ -1,7 +1,7 @@
 import { useMutation } from "@apollo/client";
 import React, { useRef, useState } from "react";
-import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
-import { useUserStore } from "../store/userStore";
+import { CHAT_MUTATION } from "@/graphql/mutations/chatMutation";
+import { useUserStore } from "@/store/userStore";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,8 +10,8 @@ import {
   faFileText,
   faPaperclip,
 } from "@fortawesome/free-solid-svg-icons";
-import { uploadDocument } from "../services/api";
-import { AttachedFileType, Message } from "../types/chat";
+import { uploadDocument } from "@/services/api";
+import { AttachedFileType, Message } from "@/types/chat";
 
 
 

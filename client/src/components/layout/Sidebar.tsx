@@ -7,14 +7,14 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card } from "../ui/card";
-import { Separator } from "../ui/separator";
-import { useChatStore } from "../../store/chatStore";
-import { useAuthStore } from "../../store/authStore";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useChatStore } from "@/store/chatStore";
+import { useAuthStore } from "@/store/authStore";
 import { SignOutButton } from "@clerk/clerk-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useLayoutStore } from "../../store/layoutStore";
+import { useLayoutStore } from "@/store/layoutStore";
 
 export const Sidebar: React.FC = () => {
   const { chatHistory, setMessages, setSession } = useChatStore();

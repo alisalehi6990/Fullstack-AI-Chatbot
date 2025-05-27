@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { useChatStore } from "../store/chatStore";
-import { ChatInterface } from "../components/chat/ChatInterface";
+import { useChatStore } from "@/store/chatStore";
+import { ChatInterface } from "@/components/chat/ChatInterface";
 
 const ChatNew: React.FC = () => {
   const [searchParams] = useSearchParams();

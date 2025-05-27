@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
-import { AuthFormData } from "../types/auth";
-import { Message } from "../types/chat";
+import { AuthFormData } from "@/types/auth";
+import { Message } from "@/types/chat";
 
 export const apiService = axios.create({
   baseURL: "http://localhost:4000",

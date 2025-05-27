@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useUser, useAuth } from "@clerk/clerk-react";
-import { clerkSignIn } from "../services/api";
-import { useAuthStore } from "../store/authStore";
-import { useToast } from "../hooks/use-toast";
-import { useChatStore } from "../store/chatStore";
+import { clerkSignIn } from "@/services/api";
+import { useAuthStore } from "@/store/authStore";
+import { useToast } from "@/hooks/use-toast";
+import { useChatStore } from "@/store/chatStore";
 
 const ClerkCallbackPage: React.FC = () => {
   const navigate = useNavigate();
@@ -44,7 +44,6 @@ const ClerkCallbackPage: React.FC = () => {
           title: "Something went wrong",
           description: error.message,
         });
-        navigate("/");
       }
     };
 

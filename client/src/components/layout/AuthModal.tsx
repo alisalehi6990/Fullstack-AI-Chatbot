@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Bot, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
-import { Button, Input, Card, Label } from "../ui";
-import { useAuthStore } from "../../store/authStore";
-import ClerkSignInButton from "../ClerkSignInButton";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../../hooks/use-toast";
-import { loginUser, registerUser } from "../../services/api";
-import { useChatStore } from "../../store/chatStore";
+import { Button, Input, Card, Label } from "@/components/ui";
+import { useAuthStore } from "@/store/authStore";
+import ClerkSignInButton from "@/components/ClerkSignInButton";
+import { useToast } from "@/hooks/use-toast";
+import { loginUser, registerUser } from "@/services/api";
+import { useChatStore } from "@/store/chatStore";
 
 export const AuthModal: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -35,7 +35,7 @@ export const AuthModal: React.FC = () => {
           localStorage.setItem("token", response.token);
           login({ ...response.user, email: formData.email }, response.token);
           if (response.user.chatHistories) {
-            setChatHistory(response.user.chatHistories)
+            setChatHistory(response.user.chatHistories);
           }
           navigate("/");
         }

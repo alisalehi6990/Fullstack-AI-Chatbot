@@ -1,8 +1,8 @@
 import React from "react";
 import { Bot, User, FileText } from "lucide-react";
-import { Card } from "../ui/card";
-import { Avatar } from "../ui/avatar";
-import { Message } from "../../types/chat";
+import { Card } from "@/components/ui/card";
+import { Avatar } from "@/components/ui/avatar";
+import { Message } from "@/types/chat";
 
 interface MessageListProps {
   messages: Message[];

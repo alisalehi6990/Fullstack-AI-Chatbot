@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Paperclip, Menu, Bot } from "lucide-react";
-import { useChatStore } from "../../store/chatStore";
-import { Button, Input } from "../../components/ui";
-import { DocumentUpload } from "./DocumentUpload";
-import { MessageList } from "./MessageList";
-import { useLayoutStore } from "../../store/layoutStore";
+import { useChatStore } from "@/store/chatStore";
+import { Button, Input } from "@/components/ui";
+import { DocumentUpload } from "@/components/chat/DocumentUpload";
+import { MessageList } from "@/components/chat/MessageList";
+import { useLayoutStore } from "@/store/layoutStore";
 
 // TODO
-import { AttachedFileType, Message } from "../../types/chat";
+import { AttachedFileType, Message } from "@/types/chat";
 
 export const ChatInterface: React.FC = () => {
   const [message, setMessage] = useState("");
@@ -126,7 +126,7 @@ export const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0 z-30">
         <div className="flex items-center space-x-3">

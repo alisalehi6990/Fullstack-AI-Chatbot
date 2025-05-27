@@ -5,6 +5,8 @@
   "dependencies": {
     "@apollo/client": "^3.13.8",
     "@clerk/clerk-react": "^5.31.4",
+    "@craco/craco": "^7.1.0",
+    "@craco/types": "^7.1.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
@@ -64,9 +66,9 @@
     "zustand": "^5.0.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
