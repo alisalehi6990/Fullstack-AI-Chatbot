@@ -12,8 +12,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { uploadDocument } from "@/services/api";
 import { AttachedFileType, Message } from "@/types/chat";
-
-
+import { useToast } from "@/hooks/use-toast";
 
 const Home: React.FC = () => {
   const { addUserChatHistory } = useUserStore();
@@ -22,6 +21,7 @@ const Home: React.FC = () => {
   const [chat] = useMutation(CHAT_MUTATION);
   const navigate = useNavigate();
   const [attachedFiles, setAttachedFiles] = useState<AttachedFileType[]>([]);
+  const { toast } = useToast();
 
   const loadingMessageRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,13 +57,12 @@ const Home: React.FC = () => {
         messages: [userMessage, botMessage],
       });
       navigate(`/chat?c=${res.data.chat.sessionId}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending message:", error);
-      const errorMessage: Message = {
-        isUser: false,
-        content: "Error contacting AI. Try again.",
-      };
-      alert(errorMessage);
+      toast({
+        title: "Something went wrong",
+        description: error.message,
+      });
       setLoading(false);
       if (loadingMessageRef.current) {
         (loadingMessageRef.current as HTMLDivElement).style.display = "none";

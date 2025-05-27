@@ -4,6 +4,7 @@ import { Message } from "@/types/chat";
 
 export const apiService = axios.create({
   baseURL: "http://localhost:4000",
+  // baseURL: "http://192.168.1.4:4000",
 });
 
 export interface AuthResponse {

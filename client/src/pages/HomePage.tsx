@@ -10,6 +10,7 @@ import { DocumentUpload } from "@/components/chat/DocumentUpload";
 import { useLayoutStore } from "@/store/layoutStore";
 import { useChatStore } from "@/store/chatStore";
 import { MessageList } from "@/components/chat/MessageList";
+import { useToast } from "@/hooks/use-toast";
 
 export type MessageDocument = {
   id: string;
@@ -30,6 +31,7 @@ const HomePage: React.FC = () => {
   const [showUpload, setShowUpload] = useState(false);
   const { isSidebarOpen, setIsSidebarOpen } = useLayoutStore();
   const { isLoading, setLoading, setChatHistory, chatHistory } = useChatStore();
+  const { toast } = useToast();
 
   const [chat] = useMutation(CHAT_MUTATION);
   const navigate = useNavigate();
@@ -72,13 +74,12 @@ const HomePage: React.FC = () => {
 
       navigate(`/chat?c=${res.data.chat.sessionId}`);
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending message:", error);
-      const errorMessage: Message = {
-        isUser: false,
-        content: "Error contacting AI. Try again.",
-      };
-      alert(errorMessage);
+      toast({
+        title: "Something went wrong",
+        description: error.message,
+      });
       setLoading(false);
     }
   };
@@ -134,7 +135,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0 z-30">
+      <div className="flex flex-wrap items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0 z-30">
         <div className="flex items-center space-x-3">
           <Button
             variant="ghost"
