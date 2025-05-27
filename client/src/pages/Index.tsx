@@ -8,7 +8,7 @@ import { ChatInterface } from '../components/chat/ChatInterface';
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isAuthenticated } = useAuthStore();
-  console.log(isAuthenticated)
+
   if (!isAuthenticated) {
     return <AuthModal />;
   }

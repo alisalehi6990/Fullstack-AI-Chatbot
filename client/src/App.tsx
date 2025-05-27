@@ -4,60 +4,31 @@ import { ApolloProvider } from "@apollo/client";
 import client from "./services/apolloClient";
 import AdminPanel from "./pages/AdminPanel";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Layout from "./components/Layout";
 import ClerkCallbackPage from "./pages/ClerkCallbackPage";
 import HomePage from "./pages/Home";
 import Index from "./pages/Index";
-import { Toaster } from "./components/ui/toaster";
-import { Toaster as Sonner } from "./components/ui/sonner";
+import LayoutWithProviders from "./components/layout/LayoutWithProviders";
 
 function App() {
   return (
-    <ApolloProvider client={client}>
-      <BrowserRouter>
-        <Layout>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route
-              path="/chat"
-              element={
-                <ProtectedRoute>
-                  <Chat />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute requiredRole="ADMIN">
-                  <AdminPanel />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/clerk-callback" element={<ClerkCallbackPage />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <HomePage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Layout>
+    <BrowserRouter>
+      <ApolloProvider client={client}>
         <Routes>
-          <Route
-            path="/new"
-            element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/clerk-callback" element={<ClerkCallbackPage />} />
+          <Route element={<LayoutWithProviders />}>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/new" element={<Index />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredRole="ADMIN" />}>
+              <Route path="/admin" element={<AdminPanel />} />
+            </Route>
+          </Route>
         </Routes>
-      </BrowserRouter>
-    </ApolloProvider>
+      </ApolloProvider>
+    </BrowserRouter>
   );
 }
 

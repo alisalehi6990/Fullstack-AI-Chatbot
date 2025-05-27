@@ -49,8 +49,9 @@ const AdminPanel: React.FC = () => {
                 <strong>Email:</strong> {user.email}
               </p>
               <p>
-                <strong>Registered:</strong>{" "}
-                {new Date(Number(user.createdAt)).toLocaleDateString()} - {new Date(Number(user.createdAt)).toLocaleTimeString()}
+                <strong>Registered:</strong>
+                {new Date(Number(user.createdAt)).toLocaleDateString()} -
+                {new Date(Number(user.createdAt)).toLocaleTimeString()}
               </p>
             </div>
             <button

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useUserStore } from "../store/userStore"; // TODO: Delete
 import { verifyToken } from "../services/api";
 import { useAuthStore } from "../store/authStore";
@@ -8,14 +8,10 @@ import { useToast } from "../hooks/use-toast";
 import { useChatStore } from "../store/chatStore";
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
   requiredRole?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  requiredRole,
-}) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { isAuthenticated, user, login, logout } = useAuthStore();
   const { setChatHistory } = useChatStore();
@@ -25,6 +21,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   useEffect(() => {
     const checkAuth = async () => {
       const localToken = localStorage.getItem("token");
+
       if (!isAuthenticated && localToken) {
         try {
           const response = await verifyToken();
@@ -68,7 +65,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/" replace />;
   }
 
-  return <>{children}</>;
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

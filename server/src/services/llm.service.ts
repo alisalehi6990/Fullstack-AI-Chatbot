@@ -58,7 +58,7 @@ export async function promptGenerator({
 
   const systemPrompt = {
     role: "system",
-    content: "You are a helpful customer support",
+    content: "You are a helpful document analyzer AI chatbot",
   };
   const userInfo = {
     role: "system",

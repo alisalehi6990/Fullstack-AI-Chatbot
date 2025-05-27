@@ -137,13 +137,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="space-y-1">
+            {user?.role === "ADMIN" && (
+              <Link to="/admin">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  size="sm"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Admin Panel
+                </Button>
+              </Link>
+            )}
             {/* <Button variant="ghost" className="w-full justify-start" size="sm">
               <FileText className="h-4 w-4 mr-2" />
               Documents
-            </Button>
-            <Button variant="ghost" className="w-full justify-start" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
             </Button> */}
             <Button
               variant="ghost"
@@ -152,10 +160,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               onClick={handleLogout}
             >
               <SignOutButton signOutOptions={{ redirectUrl: "/" }}>
-                <>
+                <div className="flex w-full">
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
-                </>
+                </div>
               </SignOutButton>
             </Button>
           </div>

@@ -203,6 +203,11 @@ export const clerkSignIn = async (req: Request, res: Response) => {
       });
       user.isActive = true;
     }
+
+    if (!user.isActive) {
+      res.status(403).json({ message: "Account is not active" });
+      return;
+    }
     const token = jwt.sign({ id: user.id }, JWT_SECRET, {
       expiresIn: "1d",
     });
