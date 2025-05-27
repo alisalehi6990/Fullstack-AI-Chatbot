@@ -2,13 +2,17 @@ import React from "react";
 import { Bot, User, FileText } from "lucide-react";
 import { Card } from "../ui/card";
 import { Avatar } from "../ui/avatar";
-import { Message } from "../../pages/Home";
+import { Message } from "../../types/chat";
 
 interface MessageListProps {
   messages: Message[];
+  aiTyping?: boolean;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
+export const MessageList: React.FC<MessageListProps> = ({
+  messages,
+  aiTyping = false,
+}) => {
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.length === 0 ? (
@@ -33,7 +37,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
             }`}
           >
             {!message.isUser && (
-              <Avatar className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600">
+              <Avatar className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 items-center justify-center">
                 <Bot className="h-5 w-5 text-white" />
               </Avatar>
             )}
@@ -52,7 +56,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
                   } whitespace-pre-wrap`}
                 >
                   {message.content}
-                  {!message.isUser && (
+                  {aiTyping && !message.isUser && (
                     <span className="inline-block w-2 h-5 bg-current ml-1 animate-pulse" />
                   )}
                 </p>
@@ -84,7 +88,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
             </Card>
 
             {message.isUser && (
-              <Avatar className="w-8 h-8 bg-gray-600">
+              <Avatar className="w-8 h-8 bg-gray-600 items-center justify-center">
                 <User className="h-5 w-5 text-white" />
               </Avatar>
             )}

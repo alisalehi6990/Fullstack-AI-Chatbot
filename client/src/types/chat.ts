@@ -5,3 +5,17 @@ export type AttachedFileType = {
   size: number;
   sizeText: string;
 };
+
+export type MessageDocument = {
+  id: string;
+  name: string;
+  type: string;
+  sizeText: string;
+};
+
+export type Message = {
+  isUser: boolean;
+  content: string;
+  documents?: MessageDocument[];
+  timestamp?: Date;
+};

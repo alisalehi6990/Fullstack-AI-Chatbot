@@ -42,7 +42,12 @@ const chatResolvers = {
           sessionId,
           messageDocuments,
         });
-
+        const userMessage = {
+          role: "human",
+          content: message,
+          documents: messageDocuments,
+          createdAt: new Date(),
+        };
         const mappedChatHistory = Array.isArray(chatSession.messages)
           ? (chatSession.messages as Prompt[])
           : [];
@@ -55,14 +60,9 @@ const chatResolvers = {
         });
 
         const reply = await queryOllama({ prompt });
-
-        const updatedMessages = [
-          ...mappedChatHistory,
-          { role: "human", content: message, documents: messageDocuments },
-          { role: "ai", content: reply },
-        ];
+        const aiMessage = { role: "ai", content: reply, createdAt: new Date() };
+        const updatedMessages = [...mappedChatHistory, userMessage, aiMessage];
         await updateSession(chatSession.id, updatedMessages as InputJsonValue);
-
         return {
           messages: prompt
             .filter((p) => p.role !== "system")

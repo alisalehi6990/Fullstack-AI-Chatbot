@@ -1,5 +1,5 @@
+import { Message } from "../types/chat";
 import { create } from "zustand";
-import { Message } from "../pages/Home";
 
 type Chat = {
   id: string;

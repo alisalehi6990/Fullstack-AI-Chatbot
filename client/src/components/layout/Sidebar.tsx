@@ -14,33 +14,31 @@ import { useChatStore } from "../../store/chatStore";
 import { useAuthStore } from "../../store/authStore";
 import { SignOutButton } from "@clerk/clerk-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useLayoutStore } from "../../store/layoutStore";
 
-interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { chatHistory, setMessages } = useChatStore();
+export const Sidebar: React.FC = () => {
+  const { chatHistory, setMessages, setSession } = useChatStore();
+  const { isSidebarOpen, setIsSidebarOpen } = useLayoutStore();
   const { logout, user } = useAuthStore();
   const navigate = useNavigate();
   const handleNewChat = () => {
-    setMessages([]);
     navigate("/");
+    setSession("");
+    setMessages([]);
   };
 
   const handleLogout = () => {
     logout();
-    onClose();
+    setIsSidebarOpen(false);
   };
 
   return (
     <>
       {/* Overlay */}
-      {isOpen && (
+      {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={onClose}
+          onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
@@ -49,7 +47,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         className={`
         fixed lg:relative inset-y-0 left-0 z-50 w-80 bg-white border-r border-gray-200 
         transform transition-transform duration-300 ease-in-out flex flex-col
-        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }
       `}
       >
         {/* Header */}
@@ -58,7 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClose}
+            onClick={() => setIsSidebarOpen(false)}
             className="lg:hidden"
           >
             <X className="h-4 w-4" />

@@ -60,15 +60,15 @@ export async function promptGenerator({
     role: "system",
     content: "You are a helpful document analyzer AI chatbot",
   };
+  prompt.push(systemPrompt);
   const userInfo = {
     role: "system",
-    content: `this is users information in the system, but don't tell him it is from system: ${JSON.stringify(
+    content: `this is user's information in the system, but don't provide this information in answer: ${JSON.stringify(
       currentUser
     )}`,
   };
 
-  prompt.push(systemPrompt);
-  prompt.push(userInfo);
+  // prompt.push(userInfo);
   if (promptGeneratorInput.context) {
     prompt.push({
       role: "system",

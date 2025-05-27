@@ -11,23 +11,11 @@ import {
   faPaperclip,
 } from "@fortawesome/free-solid-svg-icons";
 import { uploadDocument } from "../services/api";
-import { AttachedFileType } from "../types/chat";
+import { AttachedFileType, Message } from "../types/chat";
 
-export type MessageDocument = {
-  id: string;
-  name: string;
-  type: string;
-  sizeText: string;
-};
 
-export type Message = {
-  isUser: boolean;
-  content: string;
-  documents?: MessageDocument[];
-  timestamp?: Date;
-};
 
-const HomePage: React.FC = () => {
+const Home: React.FC = () => {
   const { addUserChatHistory } = useUserStore();
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -218,4 +206,4 @@ const HomePage: React.FC = () => {
   );
 };
 
-export default HomePage;
+export default Home;

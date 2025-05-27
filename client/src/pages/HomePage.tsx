@@ -1,109 +1,76 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, Menu, Bot } from "lucide-react";
-import { useChatStore } from "../../store/chatStore";
-import { Button, Input } from "../../components/ui";
-import { DocumentUpload } from "./DocumentUpload";
-import { MessageList } from "./MessageList";
-import { useLayoutStore } from "../../store/layoutStore";
+import { useMutation } from "@apollo/client";
+import React, { useState } from "react";
+import { CHAT_MUTATION } from "../graphql/mutations/chatMutation";
+import { useNavigate } from "react-router-dom";
+import { uploadDocument } from "../services/api";
+import { AttachedFileType } from "../types/chat";
+import { Button, Input } from "../components/ui";
+import { Bot, Menu, Paperclip, Send } from "lucide-react";
+import { DocumentUpload } from "../components/chat/DocumentUpload";
+import { useLayoutStore } from "../store/layoutStore";
+import { useChatStore } from "../store/chatStore";
+import { MessageList } from "../components/chat/MessageList";
 
-// TODO
-import { AttachedFileType, Message } from "../../types/chat";
+export type MessageDocument = {
+  id: string;
+  name: string;
+  type: string;
+  sizeText: string;
+};
 
-export const ChatInterface: React.FC = () => {
+export type Message = {
+  isUser: boolean;
+  content: string;
+  documents?: MessageDocument[];
+  timestamp?: Date;
+};
+
+const HomePage: React.FC = () => {
   const [message, setMessage] = useState("");
   const [showUpload, setShowUpload] = useState(false);
   const { isSidebarOpen, setIsSidebarOpen } = useLayoutStore();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const {
-    messages,
-    sessionId,
-    addMessage,
-    isLoading,
-    setLoading,
-    updateMessage,
-  } = useChatStore();
+  const { isLoading, setLoading, setChatHistory, chatHistory } = useChatStore();
 
-  // TODO
+  const [chat] = useMutation(CHAT_MUTATION);
+  const navigate = useNavigate();
   const [attachedFiles, setAttachedFiles] = useState<AttachedFileType[]>([]);
-  const [aiTyping, setAiTyping] = useState<boolean>(false);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!message.trim() || isLoading) return;
-
-    const userMessage = {
-      content: message,
+    if (!message.trim()) return;
+    const userMessage: Message = {
       isUser: true,
+      content: message,
       timestamp: new Date(),
     };
-
-    if (sessionId) {
-      addMessage(userMessage);
-      setMessage("");
-    }
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:4000/chat/stream", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      const res = await chat({
+        variables: {
           message,
-          sessionId,
           messageDocuments: attachedFiles.map((file) => ({
             id: file.id,
             name: file.name,
             type: file.type,
             sizeText: file.sizeText,
           })),
-        }),
+        },
       });
 
-      if (!response.ok || !response.body) {
-        throw new Error("Stream failed");
-      }
-      setLoading(false);
-      setAiTyping(true);
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let aiResponse = "";
       const botMessage: Message = {
-        content: "",
+        content: res.data.chat.aiResponse,
         isUser: false,
         timestamp: new Date(),
       };
-      addMessage(botMessage);
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk
-          .split("\n")
-          .filter((line: string) => line.startsWith("data: "));
+      setChatHistory([
+        {
+          id: res.data.chat.sessionId,
+          messages: [userMessage, botMessage],
+        },
+        ...chatHistory,
+      ]);
 
-        for (const line of lines) {
-          const jsonStr = line.replace("data: ", "").trim();
-          const parsed = JSON.parse(jsonStr);
-          aiResponse += parsed.content;
-          botMessage.content = aiResponse;
-          updateMessage(botMessage, messages.length + 1);
-        }
-      }
-      
-      setAiTyping(false);
-      scrollToBottom();
-      setAttachedFiles([]);
+      navigate(`/chat?c=${res.data.chat.sessionId}`);
       setLoading(false);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -111,10 +78,50 @@ export const ChatInterface: React.FC = () => {
         isUser: false,
         content: "Error contacting AI. Try again.",
       };
-      addMessage(errorMessage);
+      alert(errorMessage);
       setLoading(false);
+    }
+  };
 
-      scrollToBottom();
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      let size = Math.round(file.size / 1000); // KB
+      let sizeText = `${size} KB`;
+      if (size >= 2000) {
+        console.log("File is bigger than 2MB, rejected!!!");
+        return;
+      }
+      if (size >= 1000) {
+        size = Math.round(size / 10) / 100;
+        sizeText = `${size} MB`;
+      }
+
+      try {
+        const response = await uploadDocument({
+          file,
+          fileInfo: {
+            sizeText,
+            name: file.name,
+            type: file.type,
+          },
+        });
+        setAttachedFiles((prev) => [
+          ...prev,
+          {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            sizeText,
+            id: response.documentId,
+          },
+        ]);
+        e.target.value = "";
+        console.log("File documentId:", response.documentId);
+      } catch (error: any) {
+        console.error("Error uploading file:", error.message);
+        e.target.value = "";
+      }
     }
   };
 
@@ -124,9 +131,8 @@ export const ChatInterface: React.FC = () => {
       handleSendMessage();
     }
   };
-
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0 z-30">
         <div className="flex items-center space-x-3">
@@ -170,8 +176,7 @@ export const ChatInterface: React.FC = () => {
 
       {/* Messages */}
       <div className="flex-1">
-        <MessageList messages={messages} aiTyping={aiTyping} />
-        <div ref={messagesEndRef} />
+        <MessageList messages={[]} />
       </div>
 
       {/* Input */}
@@ -199,3 +204,5 @@ export const ChatInterface: React.FC = () => {
     </div>
   );
 };
+
+export default HomePage;

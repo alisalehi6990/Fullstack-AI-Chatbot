@@ -34,6 +34,12 @@ router.post("/stream", async (req: Request, res: Response) => {
       sessionId,
       messageDocuments,
     });
+    const userMessage = {
+      role: "human",
+      content: message,
+      documents: messageDocuments,
+      createdAt: new Date(),
+    };
 
     const prompt = await promptGenerator({
       messageHistory: chatSession.messages as any,
@@ -61,11 +67,8 @@ router.post("/stream", async (req: Request, res: Response) => {
     const mappedChatHistory = Array.isArray(chatSession.messages)
       ? (chatSession.messages as Prompt[])
       : [];
-    const updatedMessages = [
-      ...mappedChatHistory,
-      { role: "human", content: message, documents: messageDocuments },
-      { role: "ai", content: reply },
-    ];
+    const aiMessage = { role: "ai", content: reply, createdAt: new Date() };
+    const updatedMessages = [...mappedChatHistory, userMessage, aiMessage];
     await updateSession(chatSession.id, updatedMessages);
   } catch (error: any) {
     throw new ApolloError(error.message);

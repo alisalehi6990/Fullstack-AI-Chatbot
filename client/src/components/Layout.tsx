@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Sidebar } from "../components/layout/Sidebar";
 
 interface LayoutProps {
@@ -6,11 +6,10 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div className="flex h-screen">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <main className="flex-1 overflow-auto">{children}</main>
+      <Sidebar />
+      <main className="flex-1 overflow-auto h-full">{children}</main>
     </div>
   );
 };
