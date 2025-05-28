@@ -31,7 +31,7 @@ A robust backend server for an AI-powered chatbot application, built with Node.j
 - Node.js (v16 or higher)
 - npm or yarn
 - Ollama installed locally
-- PostgreSQL database
+- MongoDB database
 
 ### Installation
 
@@ -46,8 +46,9 @@ A robust backend server for an AI-powered chatbot application, built with Node.j
    ```
 4. Set up environment variables:
    Create a `.env` file with the following variables:
+
    ```
-   DATABASE_URL="postgresql://user:password@localhost:5432/chatbot"
+   DATABASE_URL="mongodb://user:password@localhost:27017/chatbot"
    JWT_SECRET="your-secret-key"
    PORT=4000
    ```
@@ -113,4 +114,4 @@ src/
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request 
+5. Open a Pull Request

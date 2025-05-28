@@ -17,6 +17,7 @@ A full-stack application that combines the power of AI with document analysis ca
 The project is divided into two main components:
 
 ### Frontend (`/client`)
+
 - React 19 with TypeScript
 - Apollo Client for GraphQL
 - Zustand for state management
@@ -24,6 +25,7 @@ The project is divided into two main components:
 - Real-time streaming support
 
 ### Backend (`/server`)
+
 - Node.js with Express
 - GraphQL API with Apollo Server
 - Prisma for database management
@@ -36,18 +38,20 @@ The project is divided into two main components:
 
 - Node.js (v16 or higher)
 - npm or yarn
-- PostgreSQL database
+- MongoDB database
 - Ollama installed locally
 
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/ai-chatbot.git
    cd ai-chatbot
    ```
 
 2. Set up the backend:
+
    ```bash
    cd server
    npm install
@@ -67,16 +71,19 @@ The project is divided into two main components:
 ## 🔧 Configuration
 
 ### Backend Environment Variables
+
 Create a `.env` file in the server directory:
+
 ```
-DATABASE_URL="postgresql://user:password@localhost:5432/chatbot"
 DATABASE_URL="mongodb://user:password@localhost:27017/chatbot"
 JWT_SECRET="your-secret-key"
 PORT=4000
 ```
 
 ### Frontend Environment Variables
+
 Create a `.env` file in the client directory:
+
 ```
 REACT_APP_API_URL=http://localhost:4000
 ```
