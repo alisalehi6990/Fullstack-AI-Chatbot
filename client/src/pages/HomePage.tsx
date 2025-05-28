@@ -2,7 +2,6 @@ import { useMutation } from "@apollo/client";
 import React, { useState } from "react";
 import { CHAT_MUTATION } from "@/graphql/mutations/chatMutation";
 import { useNavigate } from "react-router-dom";
-import { uploadDocument } from "@/services/api";
 import { AttachedFileType } from "@/types/chat";
 import { Button, Input } from "@/components/ui";
 import { Bot, Menu, Paperclip, Send } from "lucide-react";
@@ -43,22 +42,24 @@ const HomePage: React.FC = () => {
       isUser: true,
       content: message,
       timestamp: new Date(),
+      documents: [],
     };
     setLoading(true);
 
     try {
+      const messageDocuments = attachedFiles.map((file) => ({
+        id: file.id,
+        name: file.name,
+        type: file.type,
+        sizeText: file.sizeText,
+      }));
       const res = await chat({
         variables: {
           message,
-          messageDocuments: attachedFiles.map((file) => ({
-            id: file.id,
-            name: file.name,
-            type: file.type,
-            sizeText: file.sizeText,
-          })),
+          messageDocuments,
         },
       });
-
+      userMessage.documents = messageDocuments;
       const botMessage: Message = {
         content: res.data.chat.aiResponse,
         isUser: false,
@@ -84,46 +85,14 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      let size = Math.round(file.size / 1000); // KB
-      let sizeText = `${size} KB`;
-      if (size >= 2000) {
-        console.log("File is bigger than 2MB, rejected!!!");
-        return;
-      }
-      if (size >= 1000) {
-        size = Math.round(size / 10) / 100;
-        sizeText = `${size} MB`;
-      }
+  const handleFileUpload = async (file: AttachedFileType) => {
+    setAttachedFiles((prev) => [...prev, file]);
+  };
 
-      try {
-        const response = await uploadDocument({
-          file,
-          fileInfo: {
-            sizeText,
-            name: file.name,
-            type: file.type,
-          },
-        });
-        setAttachedFiles((prev) => [
-          ...prev,
-          {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            sizeText,
-            id: response.documentId,
-          },
-        ]);
-        e.target.value = "";
-        console.log("File documentId:", response.documentId);
-      } catch (error: any) {
-        console.error("Error uploading file:", error.message);
-        e.target.value = "";
-      }
-    }
+  const handleFileRemove = async (documentIds: string) => {
+    setAttachedFiles((prev) =>
+      prev.filter((file) => !documentIds.includes(file.id))
+    );
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -171,7 +140,13 @@ const HomePage: React.FC = () => {
       {/* Document Upload */}
       {showUpload && (
         <div className="p-4 border-b bg-blue-50">
-          <DocumentUpload onClose={() => setShowUpload(false)} />
+          <DocumentUpload
+            onFileUpload={handleFileUpload}
+            onClose={() => setShowUpload(false)}
+            onFileRemove={handleFileRemove}
+            initialFiles={attachedFiles}
+            sessionId={null}
+          />
         </div>
       )}
 

@@ -113,7 +113,7 @@ router.post(
         return;
       }
 
-      const chunks = await chunkText(text, 100);
+      const chunks = await chunkText(text, 50);
 
       const document = await prisma.documents.create({
         data: {

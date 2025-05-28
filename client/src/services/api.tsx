@@ -38,6 +38,7 @@ export async function loginUser(userData: AuthFormData): Promise<AuthResponse> {
     );
     return response.data;
   } catch (error: any) {
+    console.error(error?.response?.data?.message || "Login failed");
     throw new Error(error?.response?.data?.message || "Login failed");
   }
 }
@@ -52,6 +53,7 @@ export async function registerUser(
     );
     return response.data;
   } catch (error: any) {
+    console.error(error?.response?.data?.message || "Registration failed");
     throw new Error(error?.response?.data?.message || "Registration failed");
   }
 }
@@ -71,6 +73,7 @@ export async function verifyToken(): Promise<VerifyResponse> {
     );
     return response.data;
   } catch (error) {
+    console.error("Token verification failed");
     throw new Error("Token verification failed");
   }
 }
@@ -87,6 +90,7 @@ export async function clerkSignIn(userData: {
     );
     return response.data;
   } catch (error: any) {
+    console.error(error?.response?.data?.message || "Login failed");
     throw new Error(error?.response?.data?.message || "Login failed");
   }
 }
@@ -124,6 +128,7 @@ export async function uploadDocument({
       });
     return response.data;
   } catch (error: any) {
+    console.error(error?.response?.data?.message || "Upload failed");
     throw new Error(error?.response?.data?.message || "Upload failed");
   }
 }
@@ -140,6 +145,7 @@ export async function removeDocument(documentId: string) {
     });
     return response.data;
   } catch (error: any) {
+    console.error(error?.response?.data?.message || "Document removal failed");
     throw new Error(
       error?.response?.data?.message || "Document removal failed"
     );

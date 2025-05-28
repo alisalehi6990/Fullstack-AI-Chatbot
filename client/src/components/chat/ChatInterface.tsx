@@ -8,12 +8,14 @@ import { useLayoutStore } from "@/store/layoutStore";
 
 // TODO
 import { AttachedFileType, Message } from "@/types/chat";
+import { uploadDocument } from "@/services/api";
 
 export const ChatInterface: React.FC = () => {
   const [message, setMessage] = useState("");
   const [showUpload, setShowUpload] = useState(false);
   const { isSidebarOpen, setIsSidebarOpen } = useLayoutStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [aiTyping, setAiTyping] = useState<boolean>(false);
   const {
     messages,
     sessionId,
@@ -25,7 +27,6 @@ export const ChatInterface: React.FC = () => {
 
   // TODO
   const [attachedFiles, setAttachedFiles] = useState<AttachedFileType[]>([]);
-  const [aiTyping, setAiTyping] = useState<boolean>(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -100,7 +101,7 @@ export const ChatInterface: React.FC = () => {
           updateMessage(botMessage, messages.length + 1);
         }
       }
-      
+
       setAiTyping(false);
       scrollToBottom();
       setAttachedFiles([]);
@@ -123,6 +124,16 @@ export const ChatInterface: React.FC = () => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleFileUpload = async (file: AttachedFileType) => {
+    console.log(file);
+    setAttachedFiles((prev) => [...prev, file]);
+  };
+
+  const handleFileRemove = async (documentId: string) => {
+    console.log(documentId);
+    setAttachedFiles((prev) => prev.filter((file) => file.id !== documentId));
   };
 
   return (
@@ -164,7 +175,13 @@ export const ChatInterface: React.FC = () => {
       {/* Document Upload */}
       {showUpload && (
         <div className="p-4 border-b bg-blue-50">
-          <DocumentUpload onClose={() => setShowUpload(false)} />
+          <DocumentUpload
+            onClose={() => setShowUpload(false)}
+            onFileUpload={handleFileUpload}
+            onFileRemove={handleFileRemove}
+            initialFiles={attachedFiles}
+            sessionId={sessionId}
+          />
         </div>
       )}
 
