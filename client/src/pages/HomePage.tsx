@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CHAT_MUTATION } from "@/graphql/mutations/chatMutation";
 import { useNavigate } from "react-router-dom";
 import { AttachedFileType } from "@/types/chat";
@@ -29,12 +29,12 @@ const HomePage: React.FC = () => {
   const [message, setMessage] = useState("");
   const [showUpload, setShowUpload] = useState(false);
   const { isSidebarOpen, setIsSidebarOpen } = useLayoutStore();
-  const { isLoading, setLoading, setChatHistory, chatHistory } = useChatStore();
+  const { isLoading, setLoading, addChatHistory, setSession } = useChatStore();
   const { toast } = useToast();
 
   const [chat] = useMutation(CHAT_MUTATION);
   const navigate = useNavigate();
-  const [attachedFiles, setAttachedFiles] = useState<AttachedFileType[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<MessageDocument[]>([]);
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
@@ -65,13 +65,11 @@ const HomePage: React.FC = () => {
         isUser: false,
         timestamp: new Date(),
       };
-      setChatHistory([
-        {
-          id: res.data.chat.sessionId,
-          messages: [userMessage, botMessage],
-        },
-        ...chatHistory,
-      ]);
+      addChatHistory({
+        id: res.data.chat.sessionId,
+        messages: [userMessage, botMessage],
+        createdAt: new Date().toLocaleString(),
+      });
 
       navigate(`/chat?c=${res.data.chat.sessionId}`);
       setLoading(false);
@@ -85,14 +83,12 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (file: AttachedFileType) => {
+  const handleFileUpload = async (file: MessageDocument) => {
     setAttachedFiles((prev) => [...prev, file]);
   };
 
-  const handleFileRemove = async (documentIds: string) => {
-    setAttachedFiles((prev) =>
-      prev.filter((file) => !documentIds.includes(file.id))
-    );
+  const handleFileRemove = async (documentId: string) => {
+    setAttachedFiles((prev) => prev.filter((file) => file.id !== documentId));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -101,6 +97,11 @@ const HomePage: React.FC = () => {
       handleSendMessage();
     }
   };
+
+  useEffect(() => {
+    setSession(null);
+  }, []);
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}

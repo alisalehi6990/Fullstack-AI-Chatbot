@@ -1,14 +1,15 @@
 import express, { Request, Response } from "express";
 import { promptGenerator, queryOllama } from "../services/llm.service";
 import { ApolloError } from "apollo-server-express";
-import { fetchUserSession, updateSession } from "../services/session.service";
+import {
+  fetchUserSession,
+  isValidObjectId,
+  updateSession,
+} from "../services/session.service";
 import multer from "multer";
 import pdfParse from "pdf-parse";
 import { chunkText } from "../utils/chunkText";
-import {
-  getContextFromQuery,
-  processAndStoreChunks,
-} from "../services/rag.service";
+import { processAndStoreChunks } from "../services/rag.service";
 import { prisma } from "../app";
 import { removeDocumentFromQdrant } from "../services/qdrant.service";
 import { MessageDocument } from "../graphql/chat.resolver";
@@ -16,10 +17,17 @@ import { MessageDocument } from "../graphql/chat.resolver";
 const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
+
 type Prompt = {
   role: string;
   content: string;
   documents?: MessageDocument[];
+};
+
+type FileInfo = {
+  sizeText: string;
+  name: string;
+  type: string;
 };
 
 router.post("/stream", async (req: Request, res: Response) => {
@@ -74,11 +82,7 @@ router.post("/stream", async (req: Request, res: Response) => {
     throw new ApolloError(error.message);
   }
 });
-type FileInfo = {
-  sizeText: string;
-  name: string;
-  type: string;
-};
+
 router.post(
   "/documents",
   upload.single("file"),
@@ -159,4 +163,49 @@ router.delete("/documents/:id", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/clearhistory", async (req: Request, res: Response) => {
+  const currentUser = req.currentUser;
+  const keepSession = req.body.keepSession;
+  try {
+    if (keepSession) {
+      if (!isValidObjectId(keepSession)) {
+        res.status(400).json({ message: "Keep Session not found" });
+        return;
+      }
+      await prisma.chatHistory.deleteMany({
+        where: {
+          id: {
+            not: keepSession,
+          },
+          userId: currentUser.id,
+        },
+      });
+
+      await prisma.documents.deleteMany({
+        where: {
+          sessionId: {
+            not: keepSession,
+          },
+          userId: currentUser.id,
+        },
+      });
+    } else {
+      await prisma.chatHistory.deleteMany({
+        where: {
+          userId: currentUser.id,
+        },
+      });
+
+      await prisma.documents.deleteMany({
+        where: {
+          userId: currentUser.id,
+        },
+      });
+    }
+
+    res.json({ message: "Session history cleared" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 export default router;

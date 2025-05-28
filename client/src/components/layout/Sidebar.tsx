@@ -6,6 +6,7 @@ import {
   FileText,
   Settings,
   LogOut,
+  Trash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,21 +16,38 @@ import { useAuthStore } from "@/store/authStore";
 import { SignOutButton } from "@clerk/clerk-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLayoutStore } from "@/store/layoutStore";
+import { apiService } from "@/services/api";
 
 export const Sidebar: React.FC = () => {
-  const { chatHistory, setMessages, setSession } = useChatStore();
+  const { chatHistory, setMessages, setSession, sessionId, clearHistory } =
+    useChatStore();
   const { isSidebarOpen, setIsSidebarOpen } = useLayoutStore();
-  const { logout, user } = useAuthStore();
+  const { logout, user, token } = useAuthStore();
   const navigate = useNavigate();
+
   const handleNewChat = () => {
     navigate("/");
-    setSession("");
+    setSession(null);
     setMessages([]);
   };
 
   const handleLogout = () => {
     logout();
     setIsSidebarOpen(false);
+  };
+
+  const handleclearHistory = async () => {
+    clearHistory();
+    await apiService.post(
+      "/chat/clearhistory",
+      JSON.stringify({ keepSession: sessionId }),
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
   };
 
   return (
@@ -88,30 +106,43 @@ export const Sidebar: React.FC = () => {
                 </p>
               </div>
             ) : (
-              chatHistory.map((chat, index) => (
-                <Card
-                  key={index}
-                  className="p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+              <>
+                <Button
+                  onClick={handleclearHistory}
+                  variant="ghost"
+                  className="w-full justify-start"
+                  size="sm"
                 >
-                  <Link to={`/chat?c=${chat.id}`}>
-                    <div className="flex items-start space-x-3">
-                      <MessageSquare className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {"Untitled Chat"}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {chat.messages[0].content.substring(0, 10)}...
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {chat.createdAt &&
-                            new Date(chat.createdAt).toLocaleDateString()}
-                        </p>
+                  <Trash className="h-4 w-4 mr-2 text-red-600 hover:text-red-700" />
+                  Clear Histroy
+                </Button>
+                {chatHistory.map((chat, index) => (
+                  <Card
+                    key={index}
+                    className={`p-3 hover:bg-gray-50 cursor-pointer transition-colors ${
+                      sessionId === chat.id ? "shadow-lg" : ""
+                    }`}
+                  >
+                    <Link to={`/chat?c=${chat.id}`}>
+                      <div className="flex items-start space-x-3">
+                        <MessageSquare className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {"Untitled Chat"}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {chat.messages[0].content.substring(0, 10)}...
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {chat.createdAt &&
+                              new Date(chat.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                </Card>
-              ))
+                    </Link>
+                  </Card>
+                ))}
+              </>
             )}
           </div>
         </div>

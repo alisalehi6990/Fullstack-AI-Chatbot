@@ -54,6 +54,14 @@ export const loginUser = async (req: Request, res: Response) => {
             id: true,
             messages: true,
             createdAt: true,
+            documents: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                sizeText: true,
+              },
+            },
           },
           orderBy: {
             createdAt: "desc",
@@ -125,6 +133,14 @@ export const verifyToken = async (req: Request, res: Response) => {
             id: true,
             messages: true,
             createdAt: true,
+            documents: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                sizeText: true,
+              },
+            },
           },
           orderBy: {
             createdAt: "desc",
@@ -176,6 +192,14 @@ export const clerkSignIn = async (req: Request, res: Response) => {
             id: true,
             messages: true,
             createdAt: true,
+            documents: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                sizeText: true,
+              },
+            },
           },
           orderBy: {
             createdAt: "desc",

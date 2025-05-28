@@ -2,7 +2,6 @@ import { ApolloError } from "apollo-server-express";
 import { promptGenerator, queryOllama } from "../services/llm.service";
 import { InputJsonValue } from "@prisma/client/runtime/library";
 import { fetchUserSession, updateSession } from "../services/session.service";
-import { getContextFromQuery } from "../services/rag.service";
 
 export type Message = {
   isUser: boolean;

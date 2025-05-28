@@ -31,22 +31,24 @@ enum Role {
 }
 
 model ChatHistory {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id])
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String      @db.ObjectId
+  user      User        @relation(fields: [userId], references: [id])
   messages  Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  documents Documents[]
 }
 
 model Documents {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  sessionId String?  @db.ObjectId
-  userId    String   @db.ObjectId
-  User      User     @relation(fields: [userId], references: [id])
-  name      String
-  sizeText  String
-  type      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId   String?      @db.ObjectId
+  chatHistory ChatHistory? @relation(fields: [sessionId], references: [id])
+  userId      String       @db.ObjectId
+  User        User         @relation(fields: [userId], references: [id])
+  name        String
+  sizeText    String
+  type        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }

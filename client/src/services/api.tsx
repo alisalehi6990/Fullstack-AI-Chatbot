@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { AuthFormData } from "@/types/auth";
 import { Message } from "@/types/chat";
+import { ChatHistory } from "@/store/chatStore";
 
 export const apiService = axios.create({
   baseURL: "http://localhost:4000",
@@ -19,11 +20,7 @@ export interface User {
   displayName?: string;
   role: string;
   isActive: boolean;
-  chatHistories?: {
-    id: string;
-    messages: Message[];
-    createdAt: string;
-  }[];
+  chatHistories?: ChatHistory[];
 }
 
 export interface VerifyResponse {

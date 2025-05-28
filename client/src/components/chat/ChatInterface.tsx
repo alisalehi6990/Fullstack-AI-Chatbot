@@ -5,10 +5,7 @@ import { Button, Input } from "@/components/ui";
 import { DocumentUpload } from "@/components/chat/DocumentUpload";
 import { MessageList } from "@/components/chat/MessageList";
 import { useLayoutStore } from "@/store/layoutStore";
-
-// TODO
-import { AttachedFileType, Message } from "@/types/chat";
-import { uploadDocument } from "@/services/api";
+import { AttachedFileType, Message, MessageDocument } from "@/types/chat";
 
 export const ChatInterface: React.FC = () => {
   const [message, setMessage] = useState("");
@@ -16,6 +13,7 @@ export const ChatInterface: React.FC = () => {
   const { isSidebarOpen, setIsSidebarOpen } = useLayoutStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [aiTyping, setAiTyping] = useState<boolean>(false);
+  const [attachedFiles, setAttachedFiles] = useState<MessageDocument[]>([]);
   const {
     messages,
     sessionId,
@@ -24,9 +22,6 @@ export const ChatInterface: React.FC = () => {
     setLoading,
     updateMessage,
   } = useChatStore();
-
-  // TODO
-  const [attachedFiles, setAttachedFiles] = useState<AttachedFileType[]>([]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,6 +38,7 @@ export const ChatInterface: React.FC = () => {
       content: message,
       isUser: true,
       timestamp: new Date(),
+      documents: attachedFiles,
     };
 
     if (sessionId) {
@@ -62,12 +58,7 @@ export const ChatInterface: React.FC = () => {
         body: JSON.stringify({
           message,
           sessionId,
-          messageDocuments: attachedFiles.map((file) => ({
-            id: file.id,
-            name: file.name,
-            type: file.type,
-            sizeText: file.sizeText,
-          })),
+          messageDocuments: attachedFiles,
         }),
       });
 
@@ -126,13 +117,11 @@ export const ChatInterface: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (file: AttachedFileType) => {
-    console.log(file);
+  const handleFileUpload = async (file: MessageDocument) => {
     setAttachedFiles((prev) => [...prev, file]);
   };
 
   const handleFileRemove = async (documentId: string) => {
-    console.log(documentId);
     setAttachedFiles((prev) => prev.filter((file) => file.id !== documentId));
   };
 

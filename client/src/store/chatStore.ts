@@ -19,7 +19,7 @@ interface ChatStore {
   addChatHistory: (chat: ChatHistory) => void;
   clearHistory: () => void;
   setLoading: (loading: boolean) => void;
-  setSession: (sessionId: string) => void;
+  setSession: (sessionId: string | null) => void;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
@@ -31,7 +31,7 @@ export const useChatStore = create<ChatStore>((set) => ({
   setChatHistory: (chatHistory) => set({ chatHistory }),
 
   addChatHistory: (chat) =>
-    set((state) => ({ chatHistory: [...state.chatHistory, chat] })),
+    set((state) => ({ chatHistory: [chat, ...state.chatHistory] })),
 
   clearHistory: () =>
     set((state) => {

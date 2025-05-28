@@ -3,15 +3,15 @@ import { Upload, X, File, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { AttachedFileType } from "@/types/chat";
+import { MessageDocument } from "@/types/chat";
 import { removeDocument, uploadDocument } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 interface DocumentUploadProps {
   onClose: () => void;
-  onFileUpload: (file: AttachedFileType) => void;
+  onFileUpload: (file: MessageDocument) => void;
   onFileRemove: (documentId: string) => void;
-  initialFiles?: AttachedFileType[];
+  initialFiles?: MessageDocument[];
   sessionId: string | null;
 }
 
@@ -27,21 +27,21 @@ const formatFileSize = (bytes: number) => {
 
 interface FileCardProps {
   onRemove?: () => void;
-  file: AttachedFileType | File;
+  file: { sizeText: string; name: String; isOverSize?: boolean };
 }
 
 const FileCard: React.FC<FileCardProps> = ({ file, onRemove }) => {
   return (
     <div
       className={`flex items-center justify-between p-3 bg-gray-50 rounded-lg ${
-        file.size > FILE_SIZE_LIMIT ? "border-2 border-red-600" : ""
+        file.isOverSize ? "border-2 border-red-600" : ""
       }`}
     >
       <div className="flex items-center space-x-3">
         <File className="h-5 w-5 text-gray-500" />
         <div>
           <p className="text-sm font-medium text-gray-900">{file.name}</p>
-          <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+          <p className="text-xs text-gray-500">{file.sizeText}</p>
         </div>
       </div>
       {onRemove && (
@@ -67,7 +67,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
 }) => {
   const [dragOver, setDragOver] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<AttachedFileType[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<MessageDocument[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,7 +75,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
 
   useEffect(() => {
     setUploadedFiles(initialFiles);
-  }, [setUploadedFiles]);
+  }, [setUploadedFiles, initialFiles]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -148,10 +148,12 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
           id: response.documentId,
           name: file.name,
           type: file.type,
-          size: file.size,
         };
 
-        setUploadedFiles((prev) => [...prev, uploadedFile]);
+        setUploadedFiles((prev) => [
+          ...prev,
+          { ...uploadedFile, size: file.size },
+        ]);
         onFileUpload(uploadedFile);
         const progress = Math.round(((i + 1) / files.length) * 100);
         setUploadProgress(progress);
@@ -166,6 +168,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
       }
     }
 
+    await new Promise(() => setTimeout(onClose, 1000));
     setUploading(false);
   };
 
@@ -231,7 +234,11 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
             {files.map((file, index) => (
               <FileCard
                 key={index}
-                file={file}
+                file={{
+                  ...file,
+                  isOverSize: file.size > FILE_SIZE_LIMIT,
+                  sizeText: formatFileSize(file.size),
+                }}
                 onRemove={() => removeSelectedFile(index)}
               />
             ))}
