@@ -2,8 +2,7 @@ import axios, { AxiosResponse } from "axios";
 import { AuthFormData, User } from "@/types/auth";
 
 export const apiService = axios.create({
-  baseURL: "http://localhost:4000",
-  // baseURL: "http://192.168.1.4:4000",
+  baseURL: process.env.REACT_APP_BASE_API_URL,
 });
 
 export interface AuthResponse {

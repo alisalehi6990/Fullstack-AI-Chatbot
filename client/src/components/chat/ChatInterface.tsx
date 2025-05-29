@@ -58,7 +58,7 @@ export const ChatInterface: React.FC = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:4000/chat/stream", {
+      const response = await fetch(process.env.REACT_APP_BASE_API_URL + "/chat/stream", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
