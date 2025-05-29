@@ -23,10 +23,9 @@ function App() {
               <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/chat" element={<ChatPage />} />
-              </Route>
-
-              <Route element={<ProtectedRoute requiredRole="ADMIN" />}>
-                <Route path="/admin" element={<AdminPanel />} />
+                <Route element={<ProtectedRoute requiredRole="ADMIN" />}>
+                  <Route path="/admin" element={<AdminPanel />} />
+                </Route>
               </Route>
             </Route>
           </Route>

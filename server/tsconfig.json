@@ -13,6 +13,6 @@
   "include": [
     "./*.js",
     "src/**/*.ts",
-    "test/**/*.ts", "src/app.ts", "../client/src/services/apolloClient.ts",
+    "test/**/*.ts", "src/app.ts", "../client/src/services/apolloClient.ts", "src/services/together.service.js",
   ],
 }

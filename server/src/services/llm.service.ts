@@ -2,6 +2,9 @@ import { Ollama, OllamaEmbeddings } from "@langchain/ollama";
 import { getOllamaConnection } from "./ollama.service";
 import { getContextFromQuery } from "./rag.service";
 import { MessageDocument } from "../graphql/chat.resolver";
+import { getTogetherConnection } from "./together.service";
+import { TogetherAI } from "@langchain/community/llms/togetherai";
+import { TogetherAIEmbeddings } from "@langchain/community/embeddings/togetherai";
 
 type Prompt = {
   role: string;
@@ -19,8 +22,10 @@ export async function queryOllama({
   model,
   streaming = false,
 }: QueryOllamaProps) {
-  const llmConnection = getOllamaConnection({ model }) as Ollama;
-
+  const isProd = process.env.NODE_ENV === "production";
+  const llmConnection = isProd
+    ? (getTogetherConnection({ model }) as TogetherAI)
+    : (getOllamaConnection({ model }) as Ollama);
   if (streaming) {
     return await llmConnection.stream(prompt);
   }
@@ -82,9 +87,16 @@ export async function promptGenerator({
 }
 
 export async function getEmbeddings(input: string, model?: string) {
-  const llmConnection = getOllamaConnection({
-    model,
-    isEmbeding: true,
-  }) as OllamaEmbeddings;
+  const isProd = process.env.NODE_ENV === "production";
+  const llmConnection = isProd
+    ? (getTogetherConnection({
+        model,
+        isEmbeding: true,
+      }) as TogetherAIEmbeddings)
+    : (getOllamaConnection({
+        model,
+        isEmbeding: true,
+      }) as OllamaEmbeddings);
+
   return await llmConnection.embedQuery(input);
 }

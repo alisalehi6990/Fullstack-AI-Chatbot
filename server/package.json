@@ -13,7 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@langchain/community": "^0.3.44",
+    "@langchain/community": "^0.3.45",
     "@langchain/core": "^0.3.57",
     "@langchain/ollama": "^0.2.0",
     "@qdrant/js-client-rest": "^1.14.1",
@@ -34,6 +34,7 @@
     "multer": "^2.0.0",
     "pdf-parse": "^1.1.1",
     "pdf-parser": "^1.0.5",
+    "together-ai": "^0.16.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
