@@ -11,15 +11,18 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  email       String?  @unique
-  password    String?
-  displayName String?
-  isActive    Boolean  @default(false)
-  clerkId     String?
-  role        Role     @default(USER)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String?  @unique
+  password     String?
+  displayName  String?
+  isActive     Boolean  @default(false)
+  clerkId      String?
+  role         Role     @default(USER)
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  quota        Int      @default(1000)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   chatHistories ChatHistory[]
   documents     Documents[]
@@ -31,13 +34,15 @@ enum Role {
 }
 
 model ChatHistory {
-  id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String      @db.ObjectId
-  user      User        @relation(fields: [userId], references: [id])
-  messages  Json
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  documents Documents[]
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String      @db.ObjectId
+  user         User        @relation(fields: [userId], references: [id])
+  messages     Json
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  inputTokens  Int         @default(0)
+  outputTokens Int         @default(0)
+  documents    Documents[]
 }
 
 model Documents {

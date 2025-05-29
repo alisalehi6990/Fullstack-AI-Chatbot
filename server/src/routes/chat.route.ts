@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { promptGenerator, queryOllama } from "../services/llm.service";
+import { promptGenerator, llmQuery } from "../services/llm.service";
 import { ApolloError } from "apollo-server-express";
 import {
   fetchUserSession,
@@ -13,6 +13,8 @@ import { processAndStoreChunks } from "../services/rag.service";
 import { prisma } from "../app";
 import { removeDocumentFromQdrant } from "../services/qdrant.service";
 import { MessageDocument } from "../graphql/chat.resolver";
+import { countTokens } from "gpt-tokenizer";
+import { updateUserTokenUsage } from "../services/userManagement.service";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -61,7 +63,7 @@ router.post("/stream", async (req: Request, res: Response) => {
       Connection: "keep-alive",
     });
 
-    const stream = await queryOllama({ prompt, streaming: true });
+    const stream = await llmQuery({ prompt, streaming: true });
 
     let reply = "";
     for await (const chunk of stream) {
@@ -77,7 +79,25 @@ router.post("/stream", async (req: Request, res: Response) => {
       : [];
     const aiMessage = { role: "ai", content: reply, createdAt: new Date() };
     const updatedMessages = [...mappedChatHistory, userMessage, aiMessage];
-    await updateSession(chatSession.id, updatedMessages);
+
+    const promptText =
+      typeof prompt === "string" ? prompt : JSON.stringify(prompt);
+
+    const inputTokens = countTokens(promptText);
+    const outputTokens = countTokens(reply as string);
+
+    await updateSession(
+      chatSession.id,
+      updatedMessages,
+      inputTokens,
+      outputTokens
+    );
+
+    await updateUserTokenUsage({
+      userId: currentUser.id,
+      inputTokens,
+      outputTokens,
+    });
   } catch (error: any) {
     throw new ApolloError(error.message);
   }

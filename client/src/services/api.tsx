@@ -21,6 +21,7 @@ export interface User {
   role: string;
   isActive: boolean;
   chatHistories?: ChatHistory[];
+  quota: number;
 }
 
 export interface VerifyResponse {

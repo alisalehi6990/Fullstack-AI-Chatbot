@@ -52,6 +52,8 @@ export const fetchUserSession = async ({
       data: {
         userId,
         messages: [],
+        outputTokens: 0,
+        inputTokens: 0,
       },
     });
     if (messageDocuments && messageDocuments.length > 0) {
@@ -80,12 +82,16 @@ export const fetchUserSession = async ({
 
 export const updateSession = async (
   sessionId: string,
-  updatedMessages: InputJsonValue
+  updatedMessages: InputJsonValue,
+  inputTokens: number = 0,
+  outputTokens: number = 0
 ) => {
   await prisma.chatHistory.update({
     where: { id: sessionId },
     data: {
       messages: updatedMessages,
+      inputTokens: { increment: inputTokens },
+      outputTokens: { increment: outputTokens },
     },
   });
 };

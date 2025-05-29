@@ -26,6 +26,9 @@ export const registerUser = async (req: Request, res: Response) => {
         password: hashedPassword,
         displayName,
         role: Role.USER,
+        inputTokens: 0,
+        outputTokens: 0,
+        quota: 1000,
       },
     });
 
@@ -49,6 +52,9 @@ export const loginUser = async (req: Request, res: Response) => {
         role: true,
         password: true,
         isActive: true,
+        inputTokens: true,
+        outputTokens: true,
+        quota: true,
         chatHistories: {
           select: {
             id: true,
@@ -99,6 +105,9 @@ export const loginUser = async (req: Request, res: Response) => {
             role: user.role,
             isActive: user.isActive,
             chatHistories: user.chatHistories,
+            inputTokens: user.inputTokens,
+            outputTokens: user.outputTokens,
+            quota: user.quota,
           },
           token,
           message: "Login successful",
@@ -127,6 +136,9 @@ export const verifyToken = async (req: Request, res: Response) => {
         email: true,
         displayName: true,
         role: true,
+        inputTokens: true,
+        outputTokens: true,
+        quota: true,
         isActive: true,
         chatHistories: {
           select: {
@@ -187,6 +199,9 @@ export const clerkSignIn = async (req: Request, res: Response) => {
         displayName: true,
         role: true,
         isActive: true,
+        inputTokens: true,
+        outputTokens: true,
+        quota: true,
         chatHistories: {
           select: {
             id: true,
@@ -217,6 +232,9 @@ export const clerkSignIn = async (req: Request, res: Response) => {
           displayName,
           role: Role.USER,
           isActive: true,
+          inputTokens: 0,
+          outputTokens: 0,
+          quota: 1000,
         },
       });
       user = { ...createdUser, chatHistories: [] };

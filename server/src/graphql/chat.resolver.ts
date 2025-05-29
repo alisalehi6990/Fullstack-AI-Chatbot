@@ -1,7 +1,9 @@
 import { ApolloError } from "apollo-server-express";
-import { promptGenerator, queryOllama } from "../services/llm.service";
+import { promptGenerator, llmQuery } from "../services/llm.service";
 import { InputJsonValue } from "@prisma/client/runtime/library";
 import { fetchUserSession, updateSession } from "../services/session.service";
+import { countTokens } from "gpt-tokenizer";
+import { updateUserTokenUsage } from "../services/userManagement.service";
 
 export type Message = {
   isUser: boolean;
@@ -58,16 +60,33 @@ const chatResolvers = {
           documents: chatSession.documents || [],
         });
 
-        const reply = await queryOllama({ prompt });
+        const reply = await llmQuery({ prompt });
+
+        const promptText =
+          typeof prompt === "string" ? prompt : JSON.stringify(prompt);
+
+        const inputTokens = countTokens(promptText);
+        const outputTokens = countTokens(reply as string);
+
         const aiMessage = { role: "ai", content: reply, createdAt: new Date() };
         const updatedMessages = [...mappedChatHistory, userMessage, aiMessage];
-        await updateSession(chatSession.id, updatedMessages as InputJsonValue);
+        await updateSession(
+          chatSession.id,
+          updatedMessages as InputJsonValue,
+          inputTokens,
+          outputTokens
+        );
+        await updateUserTokenUsage({
+          userId: currentUser.id,
+          inputTokens,
+          outputTokens,
+        });
         return {
           messages: prompt
             .filter((p) => p.role !== "system")
             .map((p) => ({ content: p.content, isUser: p.role === "human" })),
           aiResponse: reply,
-          sessionId: chatSession?.id || "123",
+          sessionId: chatSession.id,
         };
       } catch (error: any) {
         throw new ApolloError(error.message);

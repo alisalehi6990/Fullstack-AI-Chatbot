@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useUserStore } from "@/store/userStore"; // TODO: Delete
 import { verifyToken } from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
 import { AuthModal } from "@/components/layout/AuthModal";
@@ -16,7 +15,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
   const { isAuthenticated, user, login, logout } = useAuthStore();
   const { setChatHistory } = useChatStore();
   const { toast } = useToast();
-  const { setUser, clearUser } = useUserStore(); // TODO: Delete
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -29,9 +27,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
           if (response.user.chatHistories) {
             setChatHistory(response.user.chatHistories);
           }
-          setUser(response.user, localStorage.getItem("token")); // TODO: DELETE
         } catch (error) {
-          clearUser(); // TODO: DELETE
           logout();
         }
       }
@@ -44,8 +40,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
     user,
     logout,
     login,
-    clearUser,
-    setUser,
     setChatHistory,
   ]);
 

@@ -11,6 +11,7 @@ interface User {
   isActive: boolean;
   role: string;
   chatHistories?: Chat[];
+  quota: number
 }
 
 interface AuthStore {

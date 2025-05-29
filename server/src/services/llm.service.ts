@@ -11,17 +11,17 @@ type Prompt = {
   content: string;
 };
 
-interface QueryOllamaProps {
+interface LLMQueryProps {
   model?: string;
   prompt: Prompt[] | string;
   streaming?: boolean;
 }
 
-export async function queryOllama({
+export async function llmQuery({
   prompt,
   model,
   streaming = false,
-}: QueryOllamaProps) {
+}: LLMQueryProps) {
   const isProd = process.env.NODE_ENV === "production";
   const llmConnection = isProd
     ? (getTogetherConnection({ model }) as TogetherAI)
