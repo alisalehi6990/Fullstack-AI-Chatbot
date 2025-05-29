@@ -1,12 +1,19 @@
 import { addPointToQdrant, searchQdrant } from "./qdrant.service";
 import { getEmbeddings } from "./llm.service";
 import { v4 as uuidv4 } from "uuid";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
-export async function processAndStoreChunks(
-  documentId: string,
-  chunks: string[]
-) {
+export async function processAndStoreChunks(documentId: string, text: string) {
+  const splitter = new RecursiveCharacterTextSplitter({
+    separators: ["\n\n", "\n", ". ", " ", ""],
+    chunkSize: 500,
+    chunkOverlap: 50,
+  });
+
+  const chunks = await splitter.splitText(text);
+
   const collection = process.env.QDRANT_COLLECTION;
+
   if (!collection) {
     throw new Error("Collection is not defined!!");
   }

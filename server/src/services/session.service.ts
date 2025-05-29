@@ -2,7 +2,6 @@ import { ApolloError } from "apollo-server-express";
 import { prisma } from "../app";
 import { InputJsonValue } from "@prisma/client/runtime/library";
 import { MessageDocument } from "../graphql/chat.resolver";
-import { ChatHistory, Documents } from "@prisma/client";
 
 export function isValidObjectId(id: string): boolean {
   const objectIdRegex = /^[0-9a-fA-F]{24}$/;

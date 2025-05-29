@@ -10,20 +10,7 @@ import { useChatStore } from "@/store/chatStore";
 import { MessageList } from "@/components/chat/MessageList";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/authStore";
-
-export type MessageDocument = {
-  id: string;
-  name: string;
-  type: string;
-  sizeText: string;
-};
-
-export type Message = {
-  isUser: boolean;
-  content: string;
-  documents?: MessageDocument[];
-  timestamp?: Date;
-};
+import { Message, MessageDocument } from "@/types/chat";
 
 const HomePage: React.FC = () => {
   const [message, setMessage] = useState("");

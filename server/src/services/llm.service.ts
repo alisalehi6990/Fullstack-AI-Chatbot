@@ -41,46 +41,53 @@ export async function promptGenerator({
   currentUser: any;
   messageHistory: any[];
   documents: MessageDocument[];
-  input: any;
+  input: string;
 }) {
   const prompt: Prompt[] = [];
 
-  const mappedChatHistory = Array.isArray(messageHistory)
-    ? (messageHistory as Prompt[])
-    : [];
-  const promptGeneratorInput = {
-    currentUser,
-    messageHistory: mappedChatHistory,
-    input,
-    context: "",
-  };
-  const documentsIds = documents.map((doc) => doc.id);
-  if (documents && documents.length > 0) {
-    const context = await getContextFromQuery(input, documentsIds, 3);
-    const contextString = context.join("\n\n");
-    promptGeneratorInput.context = contextString;
-  }
-
+  // 1. System Instruction - Define Role and Behavior
   const systemPrompt = {
     role: "system",
-    content: "You are a helpful document analyzer AI chatbot",
+    content: `You are an expert document analyst assistant. Your job is to answer questions based on provided documents only. 
+      If the question cannot be answered from the given context, clearly state that the information is not available in the documents.
+      Always cite the source or reference when possible.`,
   };
   prompt.push(systemPrompt);
-  const userInfo = {
-    role: "system",
-    content: `this is user's information in the system, but don't provide this information in answer: ${JSON.stringify(
-      currentUser
-    )}`,
-  };
 
-  // prompt.push(userInfo);
-  if (promptGeneratorInput.context) {
-    prompt.push({
+  // 2. Optional: User Info (don't show in final answer)
+  if (currentUser) {
+    const userInfoPrompt = {
       role: "system",
-      content: `Use the following context when answering:\n\n${promptGeneratorInput.context}\n\n`,
-    });
+      content: `User info (do not include in response): ${JSON.stringify(
+        currentUser
+      )}`,
+    };
+    prompt.push(userInfoPrompt);
   }
+
+  let contextString = "";
+  if (documents.length > 0) {
+    const context = await getContextFromQuery(
+      input,
+      documents.map((d) => d.id),
+      5
+    );
+    contextString = context.join("\n\n");
+  }
+
+  // 4. Inject Retrieved Context as System Prompt
+  if (contextString) {
+    const contextPrompt = {
+      role: "system",
+      content: `Use the following documents to answer the user's query:\n\n${contextString}\n\nAnswer based strictly on this information.`,
+    };
+    prompt.push(contextPrompt);
+  }
+
+  // 5. Add Message History (if any)
   prompt.push(...messageHistory);
+
+  // 6. Add User Input at the End
   prompt.push({ role: "human", content: input });
 
   return prompt;

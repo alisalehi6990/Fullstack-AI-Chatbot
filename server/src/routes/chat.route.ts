@@ -8,7 +8,6 @@ import {
 } from "../services/session.service";
 import multer from "multer";
 import pdfParse from "pdf-parse";
-import { chunkText } from "../utils/chunkText";
 import { processAndStoreChunks } from "../services/rag.service";
 import { prisma } from "../app";
 import { removeDocumentFromQdrant } from "../services/qdrant.service";
@@ -165,8 +164,6 @@ router.post(
         return;
       }
 
-      const chunks = await chunkText(text, 50);
-
       const document = await prisma.documents.create({
         data: {
           sessionId,
@@ -180,7 +177,7 @@ router.post(
         message: "Document processed and stored",
         documentId: document.id,
       });
-      await processAndStoreChunks(document.id, chunks);
+      await processAndStoreChunks(document.id, text);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
