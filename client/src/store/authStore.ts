@@ -1,3 +1,4 @@
+import { User } from "@/types/auth";
 import { Message } from "@/types/chat";
 import { create } from "zustand";
 
@@ -5,14 +6,6 @@ type Chat = {
   id: string;
   messages: Message[];
 };
-interface User {
-  email: string;
-  displayName?: string;
-  isActive: boolean;
-  role: string;
-  chatHistories?: Chat[];
-  quota: number
-}
 
 interface AuthStore {
   isAuthenticated: boolean;
@@ -21,6 +14,8 @@ interface AuthStore {
   login: (user: User, token: string) => void;
   logout: () => void;
   addUserChatHistory: (chat: Chat) => void;
+  updateUsedToken: (usedToken: number) => void;
+  updateQuota: (quota: number) => void;
 }
 
 export const useAuthStore = create<AuthStore>()((set) => ({
@@ -45,4 +40,12 @@ export const useAuthStore = create<AuthStore>()((set) => ({
       return state;
     });
   },
+  updateUsedToken: (usedToken) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, usedToken } : state.user,
+    })),
+  updateQuota: (quota) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, quota } : state.user,
+    })),
 }));

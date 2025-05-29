@@ -28,6 +28,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
             setChatHistory(response.user.chatHistories);
           }
         } catch (error) {
+          toast({
+            title: "Authentication Error",
+            description: "Your session has expired. Please log in again.",
+            variant: "destructive",
+          });
           logout();
         }
       }
@@ -35,13 +40,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
     };
 
     checkAuth();
-  }, [
-    isAuthenticated,
-    user,
-    logout,
-    login,
-    setChatHistory,
-  ]);
+  }, [isAuthenticated, user, logout, login, setChatHistory, toast]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -55,6 +54,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
     toast({
       title: "Nope",
       description: "You are now allowed to see this page",
+      variant: "destructive",
     });
     return <Navigate to="/" replace />;
   }

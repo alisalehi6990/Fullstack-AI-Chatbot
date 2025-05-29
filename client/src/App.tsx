@@ -1,11 +1,9 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-// import Chat from "@/pages/Chat";
 import { ApolloProvider } from "@apollo/client";
 import client from "@/services/apolloClient";
 import AdminPanel from "@/pages/AdminPanel";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ClerkCallbackPage from "@/pages/ClerkCallbackPage";
-// import Home from "@/pages/Home";
 import Layout from "@/components/layout/Layout";
 import ChatPage from "@/pages/Chat";
 import HomePage from "@/pages/HomePage";

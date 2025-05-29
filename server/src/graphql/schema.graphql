@@ -1,6 +1,7 @@
 type Message {
   aiResponse: String!
   sessionId: String!
+  usedToken: Int
 }
 input MessageDocument {
   id: String!,

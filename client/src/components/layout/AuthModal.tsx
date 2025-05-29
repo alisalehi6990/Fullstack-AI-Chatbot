@@ -47,6 +47,7 @@ export const AuthModal: React.FC = () => {
       toast({
         title: "Something went wrong",
         description: err.message,
+        variant: "destructive",
       });
     }
 

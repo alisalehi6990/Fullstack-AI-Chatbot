@@ -38,6 +38,18 @@ router.post("/stream", async (req: Request, res: Response) => {
   if (!currentUser) {
     throw new ApolloError("Authentication required", "UNAUTHENTICATED");
   }
+  // Quota check
+  const user = await prisma.user.findUnique({
+    where: { id: currentUser.id },
+    select: { inputTokens: true, outputTokens: true, quota: true },
+  });
+  const usedToken = (user?.inputTokens || 0) + (user?.outputTokens || 0);
+  if (user && user.quota !== null && usedToken >= user.quota) {
+    res
+      .status(403)
+      .json({ message: "Token quota exceeded", usedToken, quota: user.quota });
+    return;
+  }
   try {
     const chatSession = await fetchUserSession({
       userId: currentUser.id,
@@ -72,8 +84,6 @@ router.post("/stream", async (req: Request, res: Response) => {
       res.flush();
     }
 
-    res.end();
-
     const mappedChatHistory = Array.isArray(chatSession.messages)
       ? (chatSession.messages as Prompt[])
       : [];
@@ -98,6 +108,24 @@ router.post("/stream", async (req: Request, res: Response) => {
       inputTokens,
       outputTokens,
     });
+
+    // Fetch updated user token usage
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: currentUser.id },
+      select: { inputTokens: true, outputTokens: true },
+    });
+    const usedTokenFinal =
+      (updatedUser?.inputTokens || 0) + (updatedUser?.outputTokens || 0);
+
+    // Send usedToken/quota as final SSE message
+    res.write(
+      `data: ${JSON.stringify({
+        usedToken: usedTokenFinal,
+        done: true,
+      })}\n\n\n`
+    );
+    res.flush();
+    res.end();
   } catch (error: any) {
     throw new ApolloError(error.message);
   }

@@ -11,7 +11,6 @@ export const updateUserTokenUsage = async ({
   outputTokens: number;
   quota?: number;
 }) => {
-  console.log({ userId, inputTokens, outputTokens, quota });
   if (!userId || (!inputTokens && !outputTokens && !quota)) return;
   const data: any = {};
 

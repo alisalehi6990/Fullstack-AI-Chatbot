@@ -4,6 +4,7 @@ import { InputJsonValue } from "@prisma/client/runtime/library";
 import { fetchUserSession, updateSession } from "../services/session.service";
 import { countTokens } from "gpt-tokenizer";
 import { updateUserTokenUsage } from "../services/userManagement.service";
+import { prisma } from "../app";
 
 export type Message = {
   isUser: boolean;
@@ -35,6 +36,16 @@ const chatResolvers = {
       const { currentUser } = context;
       if (!currentUser) {
         throw new ApolloError("Authentication required", "UNAUTHENTICATED");
+      }
+
+      // Quota check
+      const user = await prisma.user.findUnique({
+        where: { id: currentUser.id },
+        select: { inputTokens: true, outputTokens: true, quota: true },
+      });
+      const usedToken = (user?.inputTokens || 0) + (user?.outputTokens || 0);
+      if (user && user.quota !== null && usedToken >= user.quota) {
+        throw new ApolloError("Token quota exceeded", "FORBIDDEN");
       }
 
       try {
@@ -81,12 +92,22 @@ const chatResolvers = {
           inputTokens,
           outputTokens,
         });
+
+        // Fetch updated user token usage
+        const updatedUser = await prisma.user.findUnique({
+          where: { id: currentUser.id },
+          select: { inputTokens: true, outputTokens: true, quota: true },
+        });
+        const usedTokenFinal =
+          (updatedUser?.inputTokens || 0) + (updatedUser?.outputTokens || 0);
+
         return {
           messages: prompt
             .filter((p) => p.role !== "system")
             .map((p) => ({ content: p.content, isUser: p.role === "human" })),
           aiResponse: reply,
           sessionId: chatSession.id,
+          usedToken: usedTokenFinal,
         };
       } catch (error: any) {
         throw new ApolloError(error.message);

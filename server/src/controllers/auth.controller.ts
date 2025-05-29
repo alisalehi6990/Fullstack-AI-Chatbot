@@ -105,8 +105,7 @@ export const loginUser = async (req: Request, res: Response) => {
             role: user.role,
             isActive: user.isActive,
             chatHistories: user.chatHistories,
-            inputTokens: user.inputTokens,
-            outputTokens: user.outputTokens,
+            usedToken: user.inputTokens + user.outputTokens,
             quota: user.quota,
           },
           token,
@@ -179,7 +178,18 @@ export const verifyToken = async (req: Request, res: Response) => {
           isUser: message.role === "human",
         })))
     );
-    res.status(200).json({ user });
+    const userData = {
+      email: user.email,
+      displayName: user.displayName,
+      role: user.role,
+      isActive: user.isActive,
+      chatHistories: user.chatHistories,
+      usedToken: user.inputTokens + user.outputTokens,
+      quota: user.quota,
+    };
+    res.status(200).json({
+      user: userData,
+    });
   } catch (error) {
     console.error("Error verifying token:", error);
     res.status(401).json({ message: "Invalid token" });
@@ -261,6 +271,23 @@ export const clerkSignIn = async (req: Request, res: Response) => {
         displayName: user.displayName,
         isActive: user.isActive,
         role: user.role,
+        quota: user.quota,
+        usedToken: user.inputTokens + user.outputTokens,
+        chatHistories: user.chatHistories.map((chat) => ({
+          id: chat.id,
+          messages: (chat.messages as any[]).map((message) => ({
+            content: message.content,
+            documents: message.documents,
+            isUser: message.role === "human",
+          })),
+          createdAt: chat.createdAt,
+          documents: chat.documents.map((doc) => ({
+            id: doc.id,
+            name: doc.name,
+            type: doc.type,
+            sizeText: doc.sizeText,
+          })),
+        })),
       },
       message: "Login successful",
     });

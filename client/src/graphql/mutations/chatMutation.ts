@@ -5,6 +5,7 @@ export const CHAT_MUTATION = gql`
     chat(message: $message, sessionId: $sessionId, messageDocuments: $messageDocuments) {
       aiResponse
       sessionId
+      usedToken
     }
   }
 `;

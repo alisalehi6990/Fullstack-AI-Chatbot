@@ -2,7 +2,6 @@ import { useMutation } from "@apollo/client";
 import React, { useEffect, useState } from "react";
 import { CHAT_MUTATION } from "@/graphql/mutations/chatMutation";
 import { useNavigate } from "react-router-dom";
-import { AttachedFileType } from "@/types/chat";
 import { Button, Input } from "@/components/ui";
 import { Bot, Menu, Paperclip, Send } from "lucide-react";
 import { DocumentUpload } from "@/components/chat/DocumentUpload";
@@ -10,6 +9,7 @@ import { useLayoutStore } from "@/store/layoutStore";
 import { useChatStore } from "@/store/chatStore";
 import { MessageList } from "@/components/chat/MessageList";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthStore } from "@/store/authStore";
 
 export type MessageDocument = {
   id: string;
@@ -31,6 +31,7 @@ const HomePage: React.FC = () => {
   const { isSidebarOpen, setIsSidebarOpen } = useLayoutStore();
   const { isLoading, setLoading, addChatHistory, setSession } = useChatStore();
   const { toast } = useToast();
+  const { user, updateUsedToken } = useAuthStore();
 
   const [chat] = useMutation(CHAT_MUTATION);
   const navigate = useNavigate();
@@ -38,6 +39,14 @@ const HomePage: React.FC = () => {
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
+    if (user && user?.usedToken >= user?.quota) {
+      toast({
+        title: "Quota Exceeded",
+        description: "You have exceeded your token quota.",
+        variant: "destructive",
+      });
+      return;
+    }
     const userMessage: Message = {
       isUser: true,
       content: message,
@@ -71,6 +80,10 @@ const HomePage: React.FC = () => {
         createdAt: new Date().toLocaleString(),
       });
 
+      if (user && res.data.chat.usedToken !== undefined) {
+        updateUsedToken(res.data.chat.usedToken);
+      }
+
       navigate(`/chat?c=${res.data.chat.sessionId}`);
       setLoading(false);
     } catch (error: any) {
@@ -78,6 +91,7 @@ const HomePage: React.FC = () => {
       toast({
         title: "Something went wrong",
         description: error.message,
+        variant: "destructive",
       });
       setLoading(false);
     }

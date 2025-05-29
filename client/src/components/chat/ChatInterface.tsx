@@ -5,7 +5,9 @@ import { Button, Input } from "@/components/ui";
 import { DocumentUpload } from "@/components/chat/DocumentUpload";
 import { MessageList } from "@/components/chat/MessageList";
 import { useLayoutStore } from "@/store/layoutStore";
-import { AttachedFileType, Message, MessageDocument } from "@/types/chat";
+import { useAuthStore } from "@/store/authStore";
+import { Message, MessageDocument } from "@/types/chat";
+import { useToast } from "@/hooks/use-toast";
 
 export const ChatInterface: React.FC = () => {
   const [message, setMessage] = useState("");
@@ -22,7 +24,8 @@ export const ChatInterface: React.FC = () => {
     setLoading,
     updateMessage,
   } = useChatStore();
-
+  const { user, updateUsedToken } = useAuthStore();
+  const { toast } = useToast();
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -30,10 +33,16 @@ export const ChatInterface: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
   const handleSendMessage = async () => {
     if (!message.trim() || isLoading) return;
-
+    if (user && user?.usedToken >= user?.quota) {
+      toast({
+        title: "Quota Exceeded",
+        description: "You have exceeded your token quota.",
+        variant: "destructive",
+      });
+      return;
+    }
     const userMessage = {
       content: message,
       isUser: true,
@@ -76,9 +85,10 @@ export const ChatInterface: React.FC = () => {
         timestamp: new Date(),
       };
       addMessage(botMessage);
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      let done = false;
+      while (!done) {
+        const { done: streamDone, value } = await reader.read();
+        if (streamDone) break;
         const chunk = decoder.decode(value);
         const lines = chunk
           .split("\n")
@@ -86,7 +96,18 @@ export const ChatInterface: React.FC = () => {
 
         for (const line of lines) {
           const jsonStr = line.replace("data: ", "").trim();
-          const parsed = JSON.parse(jsonStr);
+          let parsed;
+          try {
+            parsed = JSON.parse(jsonStr);
+          } catch {
+            continue;
+          }
+          if (parsed.done) {
+            // Final message with usedToken
+            updateUsedToken(parsed.usedToken);
+            done = true;
+            break;
+          }
           aiResponse += parsed.content;
           botMessage.content = aiResponse;
           updateMessage(botMessage, messages.length + 1);

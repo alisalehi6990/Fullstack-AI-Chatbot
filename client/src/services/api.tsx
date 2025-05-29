@@ -1,7 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { AuthFormData } from "@/types/auth";
-import { Message } from "@/types/chat";
-import { ChatHistory } from "@/store/chatStore";
+import { AuthFormData, User } from "@/types/auth";
 
 export const apiService = axios.create({
   baseURL: "http://localhost:4000",
@@ -12,16 +10,6 @@ export interface AuthResponse {
   token: string;
   user: User;
   message: string;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  displayName?: string;
-  role: string;
-  isActive: boolean;
-  chatHistories?: ChatHistory[];
-  quota: number;
 }
 
 export interface VerifyResponse {

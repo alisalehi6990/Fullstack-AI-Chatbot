@@ -43,6 +43,7 @@ const ClerkCallbackPage: React.FC = () => {
         toast({
           title: "Something went wrong",
           description: error.message,
+          variant: "destructive",
         });
       }
     };

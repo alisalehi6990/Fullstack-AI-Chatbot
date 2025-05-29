@@ -124,7 +124,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     setUploading(true);
     setUploadProgress(0);
 
-    const updatedFiles = [...files]; // copy to mutate safely
+    const updatedFiles = [...files];
 
     for (let i = 0; i < updatedFiles.length; i++) {
       const file = updatedFiles[i];
@@ -162,6 +162,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
         toast({
           title: "Error in uploading files",
           description: `Failed to upload "${file.name}": ${error.message}`,
+          variant: "destructive",
         });
         setUploading(false);
         return;
