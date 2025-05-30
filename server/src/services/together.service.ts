@@ -10,7 +10,7 @@ export const getTogetherConnection = ({
 }) => {
   if (isEmbeding) {
     return new TogetherAIEmbeddings({
-      model: model || "BAAI-Bge-Base-1.5",
+      model: model || "togethercomputer/m2-bert-80M-32k-retrieval",
     });
   } else {
     return new TogetherAI({

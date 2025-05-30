@@ -6,8 +6,8 @@ import {
   updateSession,
 } from "../services/session.service.js";
 import multer from "multer";
-import * as PDFJS from 'pdfjs-dist/legacy/build/pdf.mjs';
-PDFJS.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs';
+import * as PDFJS from "pdfjs-dist/legacy/build/pdf.mjs";
+PDFJS.GlobalWorkerOptions.workerSrc = "pdfjs-dist/legacy/build/pdf.worker.mjs";
 
 import { processAndStoreChunks } from "../services/rag.service.js";
 import { prisma } from "../index.js";
@@ -15,6 +15,7 @@ import { removeDocumentFromQdrant } from "../services/qdrant.service.js";
 import { countTokens } from "gpt-tokenizer";
 import { updateUserTokenUsage } from "../services/userManagement.service.js";
 import { handleError, createError } from "../utils/errorHandler.js";
+import Together from "together-ai";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -33,7 +34,8 @@ async function extractTextFromPdfBuffer(buffer: Buffer): Promise<string> {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    extractedText += content.items.map((item: any) => item.str).join(" ") + "\n";
+    extractedText +=
+      content.items.map((item: any) => item.str).join(" ") + "\n";
   }
   return extractedText.trim();
 }
@@ -97,13 +99,35 @@ router.post("/stream", async (req: Request, res: Response) => {
       Connection: "keep-alive",
     });
 
-    const stream = await llmQuery({ prompt, streaming: true });
-
     let reply = "";
-    for await (const chunk of stream) {
-      reply += chunk;
-      res.write(`data: ${JSON.stringify({ content: chunk })}\n\n\n`);
-      res.flush();
+    const isProd = process.env.NODE_ENV === "production";
+    if (isProd) {
+      const together = new Together({
+        apiKey: process.env.TOGETHER_API_KEY,
+      });
+      const stream = await together.chat.completions.create({
+        model: "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        messages: (prompt as any[]).map((p) => ({
+          role: p.role,
+          content: p.content,
+        })),
+        stream: true,
+      });
+      for await (const chunk of stream as AsyncIterable<any>) {
+        reply += chunk.choices[0]?.text || "";
+        res.write(
+          `data: ${JSON.stringify({
+            content: chunk.choices[0]?.text || "",
+          })}\n\n\n`
+        );
+      }
+    } else {
+      const stream = await llmQuery({ prompt, streaming: true });
+      for await (const chunk of stream as AsyncIterable<any>) {
+        reply += chunk;
+        res.write(`data: ${JSON.stringify({ content: chunk })}\n\n\n`);
+        res.flush();
+      }
     }
 
     const mappedChatHistory = Array.isArray(chatSession.messages)
@@ -197,7 +221,6 @@ router.post(
       let text;
       if (req.file?.mimetype === "application/pdf") {
         text = await extractTextFromPdfBuffer(buffer);
-        console.log(text);
       } else if (req.file?.mimetype === "text/plain") {
         text = buffer.toString();
       } else {
