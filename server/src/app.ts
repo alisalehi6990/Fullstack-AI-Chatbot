@@ -14,10 +14,21 @@ import chatRouter from "./routes/chat.route";
 
 // GraphQL imports
 import resolvers from "./graphql/resolvers";
-import { attachCurrentUserMiddleware, context } from "./middlewares/auth.middleware";
+import {
+  attachCurrentUserMiddleware,
+  context,
+} from "./middlewares/auth.middleware";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// Polyfill for res.flush (for SSE, if not present)
+app.use((req, res, next) => {
+  if (typeof res.flush !== "function") {
+    res.flush = () => {};
+  }
+  next();
+});
 
 app.use(express.json());
 app.use(cors());
@@ -27,7 +38,6 @@ app.use(compression());
 
 export const prisma = new PrismaClient();
 
-// ES module-compatible __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -37,25 +47,33 @@ const typeDefs = fs.readFileSync(
   "utf8"
 );
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  context,
+const startServer = async () => {
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context,
+  });
+  await server.start();
+  server.applyMiddleware({ app, path: "/graphql" });
+
+  app.get("/", (req: Request, res: Response) => {
+    res.send(
+      "Wellcome dear friend, to AI Chatbot backend. There isn't much here for you, but you can check my GitHub for the codes: https://github.com/alisalehi6990"
+    );
+  });
+
+  app.use(attachCurrentUserMiddleware);
+
+  app.use("/auth", authRoutes);
+  app.use("/chat", chatRouter);
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+};
+
+startServer().catch((err) => {
+  console.error("Failed to start server:", err);
 });
-await server.start();
-server.applyMiddleware({ app, path: "/graphql" });
 
-app.get("/", (req: Request, res: Response) => {
-  res.send(
-    "Wellcome dear friend, to AI Chatbot backend. There isn't much here for you, but you can check my GitHub for the codes: https://github.com/alisalehi6990"
-  );
-});
-
-app.use(attachCurrentUserMiddleware);
-
-app.use("/auth", authRoutes);
-app.use("/chat", chatRouter);
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+export default app; // For testing or pm2 cluster mode

@@ -45,6 +45,8 @@ export const fetchUserSession = async ({
       });
     }
     if (chatSession) {
+      // Ensure documents property exists for downstream usage
+      if (!chatSession.documents) chatSession.documents = [];
       return chatSession;
     }
     chatSession = await prisma.chatHistory.create({
@@ -71,6 +73,8 @@ export const fetchUserSession = async ({
         where: { id: { in: messageIds } },
       });
       chatSession.documents = updatedDocuments;
+    } else {
+      chatSession.documents = [];
     }
 
     return chatSession;

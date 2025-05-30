@@ -36,7 +36,7 @@ router.post("/stream", async (req: Request, res: Response) => {
   try {
     const { message, sessionId, messageDocuments } = req.body;
     const currentUser = req.currentUser;
-    
+
     if (!currentUser) {
       throw createError("Authentication required", "UNAUTHENTICATED", 401);
     }
@@ -53,10 +53,10 @@ router.post("/stream", async (req: Request, res: Response) => {
 
     const usedToken = (user.inputTokens || 0) + (user.outputTokens || 0);
     if (user.quota !== null && usedToken >= user.quota) {
-      res.status(403).json({ 
-        message: "Token quota exceeded", 
-        usedToken, 
-        quota: user.quota 
+      res.status(403).json({
+        message: "Token quota exceeded",
+        usedToken,
+        quota: user.quota,
       });
       return;
     }
@@ -132,7 +132,11 @@ router.post("/stream", async (req: Request, res: Response) => {
     });
 
     if (!updatedUser) {
-      throw createError("Failed to fetch updated user data", "INTERNAL_SERVER_ERROR", 500);
+      throw createError(
+        "Failed to fetch updated user data",
+        "INTERNAL_SERVER_ERROR",
+        500
+      );
     }
 
     const usedTokenFinal =
@@ -151,10 +155,10 @@ router.post("/stream", async (req: Request, res: Response) => {
     handleError(error, {
       userId: req.currentUser?.id,
       functionName: "stream",
-      additionalInfo: { sessionId: req.body.sessionId }
+      additionalInfo: { sessionId: req.body.sessionId },
     });
-    res.status(error.statusCode || 500).json({ 
-      message: error.message || "An unexpected error occurred" 
+    res.status(error.statusCode || 500).json({
+      message: error.message || "An unexpected error occurred",
     });
   }
 });
@@ -213,13 +217,13 @@ router.post(
       handleError(error, {
         userId: req.currentUser?.id,
         functionName: "documents",
-        additionalInfo: { 
+        additionalInfo: {
           sessionId: req.body.sessionId,
-          fileType: req.file?.mimetype 
-        }
+          fileType: req.file?.mimetype,
+        },
       });
-      res.status(error.statusCode || 500).json({ 
-        message: error.message || "An unexpected error occurred" 
+      res.status(error.statusCode || 500).json({
+        message: error.message || "An unexpected error occurred",
       });
     }
   }
@@ -246,7 +250,11 @@ router.delete("/documents/:id", async (req: Request, res: Response) => {
     }
 
     if (document.userId !== currentUser.id) {
-      throw createError("Unauthorized to delete this document", "FORBIDDEN", 403);
+      throw createError(
+        "Unauthorized to delete this document",
+        "FORBIDDEN",
+        403
+      );
     }
 
     await prisma.documents.delete({
@@ -260,10 +268,10 @@ router.delete("/documents/:id", async (req: Request, res: Response) => {
     handleError(error, {
       userId: req.currentUser?.id,
       functionName: "deleteDocument",
-      additionalInfo: { documentId: req.params.id }
+      additionalInfo: { documentId: req.params.id },
     });
-    res.status(error.statusCode || 500).json({ 
-      message: error.message || "An unexpected error occurred" 
+    res.status(error.statusCode || 500).json({
+      message: error.message || "An unexpected error occurred",
     });
   }
 });
@@ -272,6 +280,10 @@ router.post("/clearhistory", async (req: Request, res: Response) => {
   const currentUser = req.currentUser;
   const keepSession = req.body.keepSession;
   try {
+    if (!currentUser) {
+      res.status(401).json({ message: "Authentication required" });
+      return;
+    }
     if (keepSession) {
       if (!isValidObjectId(keepSession)) {
         res.status(400).json({ message: "Keep Session not found" });

@@ -29,3 +29,5 @@ type Prompt = {
   role: string;
   content: string;
 };
+
+export {};
