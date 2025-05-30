@@ -6,9 +6,10 @@ import { getTogetherConnection } from "./together.service";
 import { TogetherAI } from "@langchain/community/llms/togetherai";
 import { TogetherAIEmbeddings } from "@langchain/community/embeddings/togetherai";
 
-type Prompt = {
+export type Prompt = {
   role: string;
   content: string;
+  documents?: MessageDocument[];
 };
 
 interface LLMQueryProps {

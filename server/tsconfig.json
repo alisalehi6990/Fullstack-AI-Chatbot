@@ -8,11 +8,14 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
   "include": [
     "./*.js",
     "src/**/*.ts",
-    "test/**/*.ts", "src/app.ts", "../client/src/services/apolloClient.ts", "src/services/together.service.js",
-  ],
+    "test/**/*.ts",
+    "src/app.ts",
+    "src/services/together.service.js",
+    "src/@types/**/*.d.ts"
+  ]
 }

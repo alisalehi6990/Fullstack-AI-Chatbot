@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { promptGenerator, llmQuery } from "../services/llm.service";
+import { promptGenerator, llmQuery, Prompt } from "../services/llm.service";
 import { ApolloError } from "apollo-server-express";
 import {
   fetchUserSession,
@@ -19,12 +19,6 @@ import { handleError, createError } from "../utils/errorHandler";
 const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
-
-type Prompt = {
-  role: string;
-  content: string;
-  documents?: MessageDocument[];
-};
 
 type FileInfo = {
   sizeText: string;

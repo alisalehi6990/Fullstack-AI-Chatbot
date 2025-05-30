@@ -1,5 +1,4 @@
-import { ApolloError } from "apollo-server-express";
-import { promptGenerator, llmQuery } from "../services/llm.service";
+import { promptGenerator, llmQuery, Prompt } from "../services/llm.service";
 import { InputJsonValue } from "@prisma/client/runtime/library";
 import { fetchUserSession, updateSession } from "../services/session.service";
 import { countTokens } from "gpt-tokenizer";
