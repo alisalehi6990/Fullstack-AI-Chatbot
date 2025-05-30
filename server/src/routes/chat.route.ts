@@ -6,7 +6,9 @@ import {
   updateSession,
 } from "../services/session.service.js";
 import multer from "multer";
-import pdfParse from "pdf-parse";
+import * as PDFJS from 'pdfjs-dist/legacy/build/pdf.mjs';
+PDFJS.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs';
+
 import { processAndStoreChunks } from "../services/rag.service.js";
 import { prisma } from "../index.js";
 import { removeDocumentFromQdrant } from "../services/qdrant.service.js";
@@ -23,6 +25,18 @@ type FileInfo = {
   name: string;
   type: string;
 };
+
+async function extractTextFromPdfBuffer(buffer: Buffer): Promise<string> {
+  const loadingTask = PDFJS.getDocument({ data: new Uint8Array(buffer) });
+  const pdf = await loadingTask.promise;
+  let extractedText = "";
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    extractedText += content.items.map((item: any) => item.str).join(" ") + "\n";
+  }
+  return extractedText.trim();
+}
 
 router.post("/stream", async (req: Request, res: Response) => {
   try {
@@ -182,7 +196,8 @@ router.post(
 
       let text;
       if (req.file?.mimetype === "application/pdf") {
-        text = (await pdfParse(buffer)).text;
+        text = await extractTextFromPdfBuffer(buffer);
+        console.log(text);
       } else if (req.file?.mimetype === "text/plain") {
         text = buffer.toString();
       } else {
