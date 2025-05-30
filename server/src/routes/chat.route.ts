@@ -120,6 +120,7 @@ router.post("/stream", async (req: Request, res: Response) => {
             content: chunk.choices[0]?.text || "",
           })}\n\n\n`
         );
+        res.flush();
       }
     } else {
       const stream = await llmQuery({ prompt, streaming: true });
@@ -139,7 +140,6 @@ router.post("/stream", async (req: Request, res: Response) => {
     const promptText =
       typeof prompt === "string" ? prompt : JSON.stringify(prompt);
 
-      console.log("LLM Reply:", reply);
     const inputTokens = countTokens(promptText);
     const outputTokens = countTokens(reply as string);
 
