@@ -103,7 +103,7 @@ router.post("/stream", async (req: Request, res: Response) => {
     const isProd = process.env.NODE_ENV === "production";
     if (isProd) {
       const together = new Together({
-        apiKey: process.env.TOGETHER_API_KEY,
+        apiKey: process.env.TOGETHER_AI_API_KEY,
       });
       const stream = await together.chat.completions.create({
         model: "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
@@ -139,6 +139,7 @@ router.post("/stream", async (req: Request, res: Response) => {
     const promptText =
       typeof prompt === "string" ? prompt : JSON.stringify(prompt);
 
+      console.log("LLM Reply:", reply);
     const inputTokens = countTokens(promptText);
     const outputTokens = countTokens(reply as string);
 
