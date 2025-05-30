@@ -1,4 +1,4 @@
-import { prisma } from "../app.js";
+import { prisma } from "../index.js";
 import { handleError, createError } from "../utils/errorHandler.js";
 
 const adminResolvers = {

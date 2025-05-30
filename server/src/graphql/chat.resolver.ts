@@ -3,7 +3,7 @@ import { InputJsonValue } from "@prisma/client/runtime/library";
 import { fetchUserSession, updateSession } from "../services/session.service.js";
 import { countTokens } from "gpt-tokenizer";
 import { updateUserTokenUsage } from "../services/userManagement.service.js";
-import { prisma } from "../app.js";
+import { prisma } from "../index.js";
 import { handleError, createError } from "../utils/errorHandler.js";
 
 export type Message = {

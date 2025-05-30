@@ -9,7 +9,7 @@ import {
 import multer from "multer";
 import pdfParse from "pdf-parse";
 import { processAndStoreChunks } from "../services/rag.service.js";
-import { prisma } from "../app.js";
+import { prisma } from "../index.js";
 import { removeDocumentFromQdrant } from "../services/qdrant.service.js";
 import { countTokens } from "gpt-tokenizer";
 import { updateUserTokenUsage } from "../services/userManagement.service.js";

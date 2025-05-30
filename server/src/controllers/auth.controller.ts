@@ -1,5 +1,5 @@
 import { Response, Request } from "express";
-import { prisma } from "../app.js";
+import { prisma } from "../index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../utils/jwt.utils.js";

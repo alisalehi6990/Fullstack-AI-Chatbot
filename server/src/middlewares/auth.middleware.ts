@@ -1,6 +1,6 @@
 import { ExpressContext } from "apollo-server-express";
 import jwt from "jsonwebtoken";
-import { prisma } from "../app.js";
+import { prisma } from "../index.js";
 import { JWT_SECRET } from "../utils/jwt.utils.js";
 import { NextFunction, Request, Response } from "express";
 

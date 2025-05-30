@@ -1,5 +1,5 @@
 import { ApolloError } from "apollo-server-express";
-import { prisma } from "../app.js";
+import { prisma } from "../index.js";
 import { InputJsonValue } from "@prisma/client/runtime/library";
 import { MessageDocument } from "../graphql/chat.resolver.js";
 
