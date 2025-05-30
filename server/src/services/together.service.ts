@@ -10,11 +10,11 @@ export const getTogetherConnection = ({
 }) => {
   if (isEmbeding) {
     return new TogetherAIEmbeddings({
-      model: model || "BAAI/bge-m3",
+      model: model || "BAAI-Bge-Base-1.5",
     });
   } else {
     return new TogetherAI({
-      model: model || "meta-llama/Llama-3-8b-chat-hf",
+      model: model || "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
       maxTokens: 256,
     });
   }
