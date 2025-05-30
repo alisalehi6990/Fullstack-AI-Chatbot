@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express";
 import { promptGenerator, llmQuery, Prompt } from "../services/llm.service.js";
-import { ApolloError } from "apollo-server-express";
 import {
   fetchUserSession,
   isValidObjectId,
