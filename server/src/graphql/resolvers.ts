@@ -1,5 +1,5 @@
-import chatResolvers from "./chat.resolver";
-import adminResolvers from "./admin.resolver";
+import chatResolvers from "./chat.resolver.js";
+import adminResolvers from "./admin.resolver.js";
 
 const resolvers = {
   Query: {

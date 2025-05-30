@@ -1,5 +1,5 @@
-import { addPointToQdrant, searchQdrant } from "./qdrant.service";
-import { getEmbeddings } from "./llm.service";
+import { addPointToQdrant, searchQdrant } from "./qdrant.service.js";
+import { getEmbeddings } from "./llm.service.js";
 import { v4 as uuidv4 } from "uuid";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 

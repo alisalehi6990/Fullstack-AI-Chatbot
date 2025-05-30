@@ -1,4 +1,4 @@
-import { prisma } from "../app";
+import { prisma } from "../app.js";
 
 export const updateUserTokenUsage = async ({
   userId,

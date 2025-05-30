@@ -1,29 +1,29 @@
-import express, { Request, Response } from "express";
+import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { PrismaClient } from "@prisma/client";
 import morgan from "morgan";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer } from 'apollo-server-express';
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import compression from "compression";
 // Express Routes
-import authRoutes from "./routes/auth.route";
-import chatRouter from "./routes/chat.route";
+import authRoutes from "./routes/auth.route.js";
+import chatRouter from "./routes/chat.route.js";
 
 // GraphQL imports
-import resolvers from "./graphql/resolvers";
+import resolvers from "./graphql/resolvers.js";
 import {
   attachCurrentUserMiddleware,
   context,
-} from "./middlewares/auth.middleware";
+} from "./middlewares/auth.middleware.js";
 
-const app = express();
+const app: any = express();
 const PORT = process.env.PORT || 4000;
 
 // Polyfill for res.flush (for SSE, if not present)
-app.use((req, res, next) => {
+(app as Application).use((req, res, next) => {
   if (typeof res.flush !== "function") {
     res.flush = () => {};
   }

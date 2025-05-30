@@ -1,5 +1,5 @@
 import { ApolloError } from 'apollo-server-express';
-import { logError } from './logger';
+import { logError } from './logger.js';
 
 export class AppError extends Error {
   constructor(

@@ -1,10 +1,10 @@
-import { promptGenerator, llmQuery, Prompt } from "../services/llm.service";
+import { promptGenerator, llmQuery, Prompt } from "../services/llm.service.js";
 import { InputJsonValue } from "@prisma/client/runtime/library";
-import { fetchUserSession, updateSession } from "../services/session.service";
+import { fetchUserSession, updateSession } from "../services/session.service.js";
 import { countTokens } from "gpt-tokenizer";
-import { updateUserTokenUsage } from "../services/userManagement.service";
-import { prisma } from "../app";
-import { handleError, createError } from "../utils/errorHandler";
+import { updateUserTokenUsage } from "../services/userManagement.service.js";
+import { prisma } from "../app.js";
+import { handleError, createError } from "../utils/errorHandler.js";
 
 export type Message = {
   isUser: boolean;

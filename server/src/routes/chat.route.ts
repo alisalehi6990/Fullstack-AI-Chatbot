@@ -1,20 +1,19 @@
 import express, { Request, Response } from "express";
-import { promptGenerator, llmQuery, Prompt } from "../services/llm.service";
+import { promptGenerator, llmQuery, Prompt } from "../services/llm.service.js";
 import { ApolloError } from "apollo-server-express";
 import {
   fetchUserSession,
   isValidObjectId,
   updateSession,
-} from "../services/session.service";
+} from "../services/session.service.js";
 import multer from "multer";
 import pdfParse from "pdf-parse";
-import { processAndStoreChunks } from "../services/rag.service";
-import { prisma } from "../app";
-import { removeDocumentFromQdrant } from "../services/qdrant.service";
-import { MessageDocument } from "../graphql/chat.resolver";
+import { processAndStoreChunks } from "../services/rag.service.js";
+import { prisma } from "../app.js";
+import { removeDocumentFromQdrant } from "../services/qdrant.service.js";
 import { countTokens } from "gpt-tokenizer";
-import { updateUserTokenUsage } from "../services/userManagement.service";
-import { handleError, createError } from "../utils/errorHandler";
+import { updateUserTokenUsage } from "../services/userManagement.service.js";
+import { handleError, createError } from "../utils/errorHandler.js";
 
 const upload = multer({ storage: multer.memoryStorage() });
 

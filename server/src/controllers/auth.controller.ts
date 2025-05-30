@@ -1,8 +1,8 @@
 import { Response, Request } from "express";
-import { prisma } from "../app";
+import { prisma } from "../app.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../utils/jwt.utils";
+import { JWT_SECRET } from "../utils/jwt.utils.js";
 import { Role } from "@prisma/client";
 
 export const registerUser = async (req: Request, res: Response) => {

@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
-import { registerUser, loginUser, verifyToken, clerkSignIn } from "../controllers/auth.controller";
-import { handleError, createError } from "../utils/errorHandler";
+import { registerUser, loginUser, verifyToken, clerkSignIn } from "../controllers/auth.controller.js";
+import { handleError } from "../utils/errorHandler.js";
 
 const router = express.Router();
 

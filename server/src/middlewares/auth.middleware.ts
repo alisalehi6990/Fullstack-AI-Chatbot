@@ -1,7 +1,7 @@
 import { ExpressContext } from "apollo-server-express";
 import jwt from "jsonwebtoken";
-import { prisma } from "../app";
-import { JWT_SECRET } from "../utils/jwt.utils";
+import { prisma } from "../app.js";
+import { JWT_SECRET } from "../utils/jwt.utils.js";
 import { NextFunction, Request, Response } from "express";
 
 const findCurrentUser = async (authorization: string) => {
@@ -15,6 +15,7 @@ const findCurrentUser = async (authorization: string) => {
     if (user && user.isActive) {
       return user;
     }
+    return null;
   } catch (error) {
     // Token invalid or expired
     return null;

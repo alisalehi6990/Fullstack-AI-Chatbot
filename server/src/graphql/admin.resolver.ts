@@ -1,6 +1,5 @@
-import { ApolloError } from "apollo-server-express";
-import { prisma } from "../app";
-import { handleError, createError } from "../utils/errorHandler";
+import { prisma } from "../app.js";
+import { handleError, createError } from "../utils/errorHandler.js";
 
 const adminResolvers = {
   Query: {

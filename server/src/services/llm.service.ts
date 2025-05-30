@@ -1,8 +1,8 @@
 import { Ollama, OllamaEmbeddings } from "@langchain/ollama";
-import { getOllamaConnection } from "./ollama.service";
-import { getContextFromQuery } from "./rag.service";
-import { MessageDocument } from "../graphql/chat.resolver";
-import { getTogetherConnection } from "./together.service";
+import { getOllamaConnection } from "./ollama.service.js";
+import { getContextFromQuery } from "./rag.service.js";
+import { MessageDocument } from "../graphql/chat.resolver.js";
+import { getTogetherConnection } from "./together.service.js";
 import { TogetherAI } from "@langchain/community/llms/togetherai";
 import { TogetherAIEmbeddings } from "@langchain/community/embeddings/togetherai";
 
