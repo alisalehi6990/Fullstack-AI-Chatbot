@@ -138,7 +138,7 @@ export const Sidebar: React.FC = () => {
                             {"Untitled Chat"}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
-                            {chat.messages[0].content.substring(0, 10)}...
+                            {chat.messages[0]?.content.substring(0, 10)}...
                           </p>
                           <p className="text-xs text-gray-400 mt-1">
                             {chat.createdAt &&

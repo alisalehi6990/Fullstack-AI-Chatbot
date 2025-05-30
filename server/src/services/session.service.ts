@@ -47,7 +47,7 @@ export const fetchUserSession = async ({
     if (chatSession) {
       // Ensure documents property exists for downstream usage
       if (!chatSession.documents) chatSession.documents = [];
-      return chatSession;
+      return chatSession.filter((chat: any) => chat.messages && chat.messages.length > 0);
     }
     chatSession = await prisma.chatHistory.create({
       data: {

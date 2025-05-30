@@ -183,7 +183,9 @@ export const verifyToken = async (req: Request, res: Response) => {
       displayName: user.displayName,
       role: user.role,
       isActive: user.isActive,
-      chatHistories: user.chatHistories,
+      chatHistories: user.chatHistories.filter(
+        (chat) => chat.messages && (chat.messages as any[]).length > 0
+      ),
       usedToken: user.inputTokens + user.outputTokens,
       quota: user.quota,
     };
