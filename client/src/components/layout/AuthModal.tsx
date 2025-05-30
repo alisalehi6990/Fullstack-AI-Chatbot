@@ -41,6 +41,11 @@ export const AuthModal: React.FC = () => {
         }
       } else {
         await registerUser!(formData);
+        toast({
+          title: "User created",
+          description:
+            "You need to wait for admins to confirm your user. You can login using Clerk if you want instant activation",
+        });
         setIsLogin(true);
       }
     } catch (err: any) {
