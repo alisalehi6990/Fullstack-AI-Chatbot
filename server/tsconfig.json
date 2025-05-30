@@ -3,7 +3,7 @@
     "target": "ESNext",
     "module": "NodeNext",
     "lib": ["ESNext"],
-    "outDir": "./build",
+    "outDir": "./dist",
     "rootDir": "./",
     "strict": true,
     "noImplicitAny": true,
@@ -15,13 +15,7 @@
       "@/*": ["./src/*"]
     },
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true
+    "skipLibCheck": true
   },
-  "exclude": ["node_modules", "build", "docker-volumes", "gulpfile.js"],
-
-  "ts-node": {
-    "esm": true,
-    "transpileOnly": true
-  }
+  "exclude": ["node_modules", "dist", "build", "docker-volumes", "gulpfile.js"]
 }
