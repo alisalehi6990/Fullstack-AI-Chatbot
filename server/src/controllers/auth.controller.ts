@@ -28,7 +28,7 @@ export const registerUser = async (req: Request, res: Response) => {
         role: Role.USER,
         inputTokens: 0,
         outputTokens: 0,
-        quota: 1000,
+        quota: 10000,
       },
     });
 
@@ -246,7 +246,7 @@ export const clerkSignIn = async (req: Request, res: Response) => {
           isActive: true,
           inputTokens: 0,
           outputTokens: 0,
-          quota: 1000,
+          quota: 10000,
         },
       });
       user = { ...createdUser, chatHistories: [] };
