@@ -50,6 +50,13 @@ export const Sidebar: React.FC = () => {
     );
   };
 
+  let quotaUsageStagePercentage = 0;
+  if (user) {
+    quotaUsageStagePercentage = Math.round(
+      (user?.usedToken / user?.quota) * 100
+    );
+  }
+
   return (
     <>
       {/* Overlay */}
@@ -167,6 +174,27 @@ export const Sidebar: React.FC = () => {
             </div>
           </div>
 
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-gray-900 truncate">
+              Quota:{" "}
+              <span
+                className={` ${
+                  quotaUsageStagePercentage < 25
+                    ? "text-green-400"
+                    : quotaUsageStagePercentage < 50
+                    ? "text-yellow-400"
+                    : quotaUsageStagePercentage < 75
+                    ? "text-orange-400"
+                    : quotaUsageStagePercentage < 100
+                    ? "text-orange-500"
+                    : "text-red-600"
+                }`}
+              >
+                {Math.min(user?.usedToken || 0, user?.quota || 0)}
+              </span>
+              /<span className="bold">{user?.quota}</span>
+            </p>
+          </div>
           <div className="space-y-1">
             {user?.role === "ADMIN" && (
               <Link to="/admin">

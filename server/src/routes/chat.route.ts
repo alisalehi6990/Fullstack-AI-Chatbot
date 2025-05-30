@@ -14,6 +14,7 @@ import { removeDocumentFromQdrant } from "../services/qdrant.service";
 import { MessageDocument } from "../graphql/chat.resolver";
 import { countTokens } from "gpt-tokenizer";
 import { updateUserTokenUsage } from "../services/userManagement.service";
+import { handleError, createError } from "../utils/errorHandler";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -32,29 +33,44 @@ type FileInfo = {
 };
 
 router.post("/stream", async (req: Request, res: Response) => {
-  const { message, sessionId, messageDocuments } = req.body;
-  const currentUser = req.currentUser;
-  if (!currentUser) {
-    throw new ApolloError("Authentication required", "UNAUTHENTICATED");
-  }
-  // Quota check
-  const user = await prisma.user.findUnique({
-    where: { id: currentUser.id },
-    select: { inputTokens: true, outputTokens: true, quota: true },
-  });
-  const usedToken = (user?.inputTokens || 0) + (user?.outputTokens || 0);
-  if (user && user.quota !== null && usedToken >= user.quota) {
-    res
-      .status(403)
-      .json({ message: "Token quota exceeded", usedToken, quota: user.quota });
-    return;
-  }
   try {
+    const { message, sessionId, messageDocuments } = req.body;
+    const currentUser = req.currentUser;
+    
+    if (!currentUser) {
+      throw createError("Authentication required", "UNAUTHENTICATED", 401);
+    }
+
+    // Quota check
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.id },
+      select: { inputTokens: true, outputTokens: true, quota: true },
+    });
+
+    if (!user) {
+      throw createError("User not found", "NOT_FOUND", 404);
+    }
+
+    const usedToken = (user.inputTokens || 0) + (user.outputTokens || 0);
+    if (user.quota !== null && usedToken >= user.quota) {
+      res.status(403).json({ 
+        message: "Token quota exceeded", 
+        usedToken, 
+        quota: user.quota 
+      });
+      return;
+    }
+
     const chatSession = await fetchUserSession({
       userId: currentUser.id,
       sessionId,
       messageDocuments,
     });
+
+    if (!chatSession) {
+      throw createError("Chat session not found", "NOT_FOUND", 404);
+    }
+
     const userMessage = {
       role: "human",
       content: message,
@@ -68,6 +84,7 @@ router.post("/stream", async (req: Request, res: Response) => {
       input: message,
       documents: chatSession.documents || [],
     });
+
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
@@ -113,8 +130,13 @@ router.post("/stream", async (req: Request, res: Response) => {
       where: { id: currentUser.id },
       select: { inputTokens: true, outputTokens: true },
     });
+
+    if (!updatedUser) {
+      throw createError("Failed to fetch updated user data", "INTERNAL_SERVER_ERROR", 500);
+    }
+
     const usedTokenFinal =
-      (updatedUser?.inputTokens || 0) + (updatedUser?.outputTokens || 0);
+      (updatedUser.inputTokens || 0) + (updatedUser.outputTokens || 0);
 
     // Send usedToken/quota as final SSE message
     res.write(
@@ -126,7 +148,14 @@ router.post("/stream", async (req: Request, res: Response) => {
     res.flush();
     res.end();
   } catch (error: any) {
-    throw new ApolloError(error.message);
+    handleError(error, {
+      userId: req.currentUser?.id,
+      functionName: "stream",
+      additionalInfo: { sessionId: req.body.sessionId }
+    });
+    res.status(error.statusCode || 500).json({ 
+      message: error.message || "An unexpected error occurred" 
+    });
   }
 });
 
@@ -144,14 +173,15 @@ router.post(
     try {
       const currentUser = req.currentUser;
       if (!currentUser) {
-        throw new ApolloError("Authentication required", "UNAUTHENTICATED");
+        throw createError("Authentication required", "UNAUTHENTICATED", 401);
       }
+
       const buffer = req.file?.buffer;
       const sessionId = req.body.sessionId;
       const fileInfo = JSON.parse(req.body.fileInfo);
+
       if (!buffer) {
-        res.status(400).json({ error: "No file uploaded" });
-        return;
+        throw createError("No file uploaded", "BAD_REQUEST", 400);
       }
 
       let text;
@@ -160,8 +190,7 @@ router.post(
       } else if (req.file?.mimetype === "text/plain") {
         text = buffer.toString();
       } else {
-        res.status(400).json({ error: "Unsupported file type" });
-        return;
+        throw createError("Unsupported file type", "BAD_REQUEST", 400);
       }
 
       const document = await prisma.documents.create({
@@ -173,13 +202,25 @@ router.post(
           sizeText: fileInfo.sizeText,
         },
       });
+
       res.json({
         message: "Document processed and stored",
         documentId: document.id,
       });
+
       await processAndStoreChunks(document.id, text);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      handleError(error, {
+        userId: req.currentUser?.id,
+        functionName: "documents",
+        additionalInfo: { 
+          sessionId: req.body.sessionId,
+          fileType: req.file?.mimetype 
+        }
+      });
+      res.status(error.statusCode || 500).json({ 
+        message: error.message || "An unexpected error occurred" 
+      });
     }
   }
 );
@@ -188,23 +229,42 @@ router.delete("/documents/:id", async (req: Request, res: Response) => {
   try {
     const currentUser = req.currentUser;
     if (!currentUser) {
-      throw new ApolloError("Authentication required", "UNAUTHENTICATED");
+      throw createError("Authentication required", "UNAUTHENTICATED", 401);
     }
+
     const { id } = req.params;
-    await prisma.documents
-      .delete({
-        where: {
-          id,
-          userId: currentUser.id,
-        },
-      })
-      .catch((e) => {
-        console.log("Document FAILED to delete from Mongo", e.message);
-      });
+    if (!isValidObjectId(id)) {
+      throw createError("Invalid document ID", "BAD_REQUEST", 400);
+    }
+
+    const document = await prisma.documents.findUnique({
+      where: { id },
+    });
+
+    if (!document) {
+      throw createError("Document not found", "NOT_FOUND", 404);
+    }
+
+    if (document.userId !== currentUser.id) {
+      throw createError("Unauthorized to delete this document", "FORBIDDEN", 403);
+    }
+
+    await prisma.documents.delete({
+      where: { id },
+    });
+
     await removeDocumentFromQdrant(id);
-    res.json({ message: "Document deleted" });
+
+    res.json({ message: "Document deleted successfully" });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    handleError(error, {
+      userId: req.currentUser?.id,
+      functionName: "deleteDocument",
+      additionalInfo: { documentId: req.params.id }
+    });
+    res.status(error.statusCode || 500).json({ 
+      message: error.message || "An unexpected error occurred" 
+    });
   }
 });
 
@@ -253,4 +313,5 @@ router.post("/clearhistory", async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 export default router;

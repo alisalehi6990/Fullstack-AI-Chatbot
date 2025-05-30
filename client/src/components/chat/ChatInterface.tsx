@@ -58,21 +58,24 @@ export const ChatInterface: React.FC = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(process.env.REACT_APP_BASE_API_URL + "/chat/stream", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          message,
-          sessionId,
-          messageDocuments: attachedFiles,
-        }),
-      });
+      const response = await fetch(
+        process.env.REACT_APP_BASE_API_URL + "/chat/stream",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            message,
+            sessionId,
+            messageDocuments: attachedFiles,
+          }),
+        }
+      );
 
       if (!response.ok || !response.body) {
-        throw new Error("Stream failed");
+        throw new Error(response.statusText || "Stream failed");
       }
       setLoading(false);
       setAiTyping(true);
@@ -118,7 +121,7 @@ export const ChatInterface: React.FC = () => {
       scrollToBottom();
       setAttachedFiles([]);
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending message:", error);
       const errorMessage: Message = {
         isUser: false,
@@ -126,7 +129,11 @@ export const ChatInterface: React.FC = () => {
       };
       addMessage(errorMessage);
       setLoading(false);
-
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
       scrollToBottom();
     }
   };
