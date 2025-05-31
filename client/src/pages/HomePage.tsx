@@ -14,6 +14,7 @@ import { Message, MessageDocument } from "@/types/chat";
 
 const HomePage: React.FC = () => {
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const { isSidebarOpen, setIsSidebarOpen } = useLayoutStore();
   const { isLoading, setLoading, addChatHistory, setSession } = useChatStore();
@@ -40,6 +41,10 @@ const HomePage: React.FC = () => {
       timestamp: new Date(),
       documents: [],
     };
+    setMessages([
+      userMessage,
+      { isUser: false, content: "", timestamp: new Date() },
+    ]);
     setLoading(true);
 
     try {
@@ -154,7 +159,7 @@ const HomePage: React.FC = () => {
 
       {/* Messages */}
       <div className="flex-1">
-        <MessageList messages={[]} />
+        <MessageList messages={messages} aiTyping={isLoading} />
       </div>
 
       {/* Input */}
@@ -164,7 +169,7 @@ const HomePage: React.FC = () => {
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               placeholder="Ask me anything about your documents..."
               className="pr-12 py-3 resize-none rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               disabled={isLoading}
