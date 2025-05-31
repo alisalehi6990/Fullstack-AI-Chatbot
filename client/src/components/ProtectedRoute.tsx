@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/authStore";
 import { AuthModal } from "@/components/layout/AuthModal";
 import { useToast } from "@/hooks/use-toast";
 import { useChatStore } from "@/store/chatStore";
+import { Spinner } from "./ui/spinner";
 
 interface ProtectedRouteProps {
   requiredRole?: string;
@@ -43,7 +44,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
   }, [isAuthenticated, user, logout, login, setChatHistory, toast]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex flex-col h-full min-h-screen items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Spinner className="text-blue-400">
+            <span className="text-blue-800 font-medium">
+              Waking sleepy Render Cloud Service up, please wait...
+            </span>
+          </Spinner>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
