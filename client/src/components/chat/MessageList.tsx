@@ -56,9 +56,11 @@ export const MessageList: React.FC<MessageListProps> = ({
                   } whitespace-pre-wrap`}
                 >
                   {message.content}
-                  {aiTyping && !message.isUser && (
-                    <span className="inline-block w-2 h-5 bg-current ml-1 animate-pulse" />
-                  )}
+                  {aiTyping &&
+                    !message.isUser &&
+                    index === messages.length - 1 && (
+                      <span className="inline-block w-2 h-5 bg-current ml-1 animate-pulse" />
+                    )}
                 </p>
 
                 {message.documents && message.documents.length > 0 && (

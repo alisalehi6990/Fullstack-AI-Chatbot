@@ -56,15 +56,15 @@ export async function promptGenerator({
   prompt.push(systemPrompt);
 
   // 2. Optional: User Info (don't show in final answer)
-  if (currentUser) {
-    const userInfoPrompt = {
-      role: "system",
-      content: `User info (do not include in response): ${JSON.stringify(
-        currentUser
-      )}`,
-    };
-    prompt.push(userInfoPrompt);
-  }
+  // if (currentUser) {
+  //   const userInfoPrompt = {
+  //     role: "system",
+  //     content: `User info (do not include in response): ${JSON.stringify(
+  //       currentUser
+  //     )}`,
+  //   };
+  //   prompt.push(userInfoPrompt);
+  // }
 
   let contextString = "";
   if (documents.length > 0) {

@@ -1,53 +1,63 @@
-# AI-Powered Document Analysis Chatbot
+# AI-Powered Document Analysis Chatbot 🧠💬
+
+> A fully custom-built full-stack AI chatbot with document analysis capabilities using modern web technologies.
+
+This project is a **from-scratch implementation** of an intelligent chatbot application that allows users to engage in real-time conversations and analyze documents (PDFs and TXT files) using AI. It combines a React frontend with a Node.js backend, powered by LangChain, Ollama, and Qdrant for advanced language processing and vector storage.
+
+Built entirely without templates or starter kits, this repo demonstrates solid full-stack development practices including GraphQL, JWT authentication, streaming responses, and scalable architecture.
+
+---
 
 A full-stack application that combines the power of AI with document analysis capabilities. This project features a modern React frontend and a robust Node.js backend, providing an intelligent chatbot that can analyze documents and engage in meaningful conversations.
 
 ## 🌟 Key Features
 
-- **Intelligent Chat Interface**: Real-time conversations with AI-powered responses
-- **Document Analysis**: Upload and analyze PDF and TXT files
-- **Streaming Responses**: Real-time streaming of AI responses for better user experience
-- **Secure Authentication**: JWT-based authentication system
-- **Modern UI**: Responsive design with a clean, intuitive interface
-- **Vector Database**: Efficient document storage and retrieval using Qdrant
-- **AI Integration**: Powered by LangChain and Ollama for advanced language processing
+- 🔁 Real-time streaming AI responses  
+- 📄 Upload and analyze PDF/TXT documents  
+- 🔐 Secure user authentication with JWT  
+- 💬 Interactive chat interface  
+- 📊 Vector database integration via Qdrant  
+- ⚙️ Modular GraphQL API with Apollo Server  
+- 🗂 Prisma ORM for MongoDB  
+- 🎨 Responsive UI with Tailwind CSS  
+- 📦 Custom state management with Zustand 
 
 ## 🏗️ Architecture
 
-The project is divided into two main components:
+### Frontend
+- [React 19](https://reactjs.org/)  + TypeScript  
+- [Apollo Client](https://www.apollographql.com/client/)   
+- [Zustand](https://zustand.docs.page/)  for global state  
+- [Tailwind CSS](https://tailwindcss.com/)   
+- WebSocket-based streaming UI updates  
 
-### Frontend (`/client`)
+### Backend
+- [Node.js](https://nodejs.org/)  + Express  
+- [Apollo Server](https://www.apollographql.com/server/)  for GraphQL  
+- [Prisma ORM](https://www.prisma.io/)   
+- [LangChain](https://js.langchain.com/)  & [Ollama](https://ollama.ai/)   
+- [Qdrant](https://qdrant.tech/)  for vector embeddings  
+- JWT-based authentication  
 
-- React 19 with TypeScript
-- Apollo Client for GraphQL
-- Zustand for state management
-- Tailwind CSS for styling
-- Real-time streaming support
-
-### Backend (`/server`)
-
-- Node.js with Express
-- GraphQL API with Apollo Server
-- Prisma for database management
-- LangChain and Ollama integration
-- Document processing capabilities
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
-- MongoDB database
-- Ollama installed locally
+- Node.js v16 or higher  
+- Yarn or npm  
+- MongoDB (optional if using as fallback DB)  
+- Ollama running locally (Or online AI model services) 
+- Docker (recommended for Qdrant setup or online service from thei website)  
 
 ### Installation
 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/ai-chatbot.git
-   cd ai-chatbot
+   git clone https://github.com/alisalehi6990/Fullstack-AI-Chatbot.git 
+   cd Fullstack-AI-Chatbot
    ```
 
 2. Set up the backend:
@@ -78,6 +88,9 @@ Create a `.env` file in the server directory:
 DATABASE_URL="mongodb://user:password@localhost:27017/chatbot"
 JWT_SECRET="your-secret-key"
 PORT=4000
+QDRANT_API_KEY="your-secret-key"
+QDRANT_COLLECTION="your-collection-name"
+TOGETHER_AI_API_KEY="your-secret-key"
 ```
 
 ### Frontend Environment Variables
@@ -86,6 +99,7 @@ Create a `.env` file in the client directory:
 
 ```
 REACT_APP_API_URL=http://localhost:4000
+REACT_APP_CLERK_PUBLISHABLE_KEY="your-secret-key"
 ```
 
 ## 📚 Documentation
