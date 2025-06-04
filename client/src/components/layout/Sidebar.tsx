@@ -3,7 +3,6 @@ import {
   X,
   Plus,
   MessageSquare,
-  FileText,
   Settings,
   LogOut,
   Trash,

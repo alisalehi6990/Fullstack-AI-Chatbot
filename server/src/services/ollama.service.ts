@@ -10,12 +10,12 @@ export const getOllamaConnection = ({
   if (isEmbeding) {
     return new OllamaEmbeddings({
       model: model || "mxbai-embed-large",
-      baseUrl: "http://localhost:11434",
+      baseUrl: process.env.OLLAMA_LOCAL_URL,
     });
   } else {
     return new Ollama({
       model: model || "llama3",
-      baseUrl: "http://localhost:11434",
+      baseUrl: process.env.OLLAMA_LOCAL_URL,
     });
   }
 };

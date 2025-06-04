@@ -106,7 +106,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     setSession(null);
-  }, []);
+  }, [setSession]);
 
   return (
     <div className="flex flex-col h-full">
