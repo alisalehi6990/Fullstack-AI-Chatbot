@@ -5,7 +5,7 @@ const ClerkSignInButton: React.FC = () => {
   return (
     <SignInButton
       mode={"modal"}
-      fallbackRedirectUrl={"http://localhost:3000/clerk-callback"}
+      fallbackRedirectUrl={"/clerk-callback"}
       oauthFlow={"popup"}
     >
       <button className="rounded-md flex justify-center items-center text-white w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 py-3">
